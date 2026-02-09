@@ -1,0 +1,20 @@
+{
+  "name": "auditauth-sdk",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -ws",
+    "dev": "npm run dev -ws",
+
+    "build:next": "npm run build -w @auditauth/next",
+    "dev:next": "npm run dev -w @auditauth/next",
+
+    "build:web": "npm run build -w @auditauth/web",
+    "dev:web": "npm run dev -w @auditauth/web"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

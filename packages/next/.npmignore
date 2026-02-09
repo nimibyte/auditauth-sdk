@@ -1,0 +1,6 @@
+src
+tsconfig.json
+tsconfig.build.json
+README.md
+.DS_Store
+*.log
