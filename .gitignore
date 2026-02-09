@@ -1,2 +1,24 @@
+# OS
+.DS_Store
+
+# Node
 node_modules
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# Build
 dist
+*.tsbuildinfo
+
+# Env
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Cache
+.turbo
+.cache
