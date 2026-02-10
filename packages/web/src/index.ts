@@ -1,5 +1,3 @@
-const MIPOLLA = 'mipollassssss';
-
 type AuditAuthConfig = {
   apiKey: string;
   redirectUrl: string;
@@ -25,4 +23,4 @@ class AuditAuthWeb {
   }
 }
 
-export { MIPOLLA, AuditAuthWeb };
+export { AuditAuthWeb };
