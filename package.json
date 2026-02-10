@@ -12,7 +12,10 @@
     "dev:next": "npm run dev -w @auditauth/next",
 
     "build:web": "npm run build -w @auditauth/web",
-    "dev:web": "npm run dev -w @auditauth/web"
+    "dev:web": "npm run dev -w @auditauth/web",
+
+    "build:core": "npm run build -w @auditauth/core",
+    "dev:core": "npm run dev -w @auditauth/core"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

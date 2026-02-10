@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { importSPKI, jwtVerify } from 'jose';
 import {
-  AuditAuthConfig,
   CookieAdapter,
   CredentialResponse,
   Metric,
@@ -11,6 +10,7 @@ import {
   SessionUser
 } from "./types";
 import { SETTINGS } from "./settings";
+import { buildAuthUrl, AuditAuthConfig } from '@auditauth/core';
 
 /* -------------------------------------------------------------------------- */
 /*                                    KEYS                                    */
@@ -113,23 +113,6 @@ class AuditAuthNext {
   /* ------------------------------------------------------------------------ */
   /*                              AUTH FLOWS                                  */
   /* ------------------------------------------------------------------------ */
-
-  private async buildAuthUrl(): Promise<URL> {
-    const response = await fetch(`${SETTINGS.domains.api}/applications/login`, {
-      method: 'POST',
-      headers: { 'x-api-key': this.config.apiKey },
-    });
-
-    if (!response.ok) {
-      throw new Error('invalid_app');
-    }
-
-    const { code, redirectUrl } = await response.json();
-    const url = new URL(redirectUrl);
-    url.searchParams.set('code', code);
-
-    return url;
-  }
 
   async callback(request: NextRequest) {
     const code = new URL(request.url).searchParams.get('code');
@@ -387,14 +370,14 @@ class AuditAuthNext {
 
         switch (action) {
           case 'login': {
-            const url = await this.buildAuthUrl();
+            const url = await buildAuthUrl({ apiKey: this.config.apiKey, redirectUrl: `${this.config.baseUrl}/api/auditauth/callback` });
             return NextResponse.redirect(url);
           };
           case 'refresh': {
             const { ok } = await this.refresh();
             if (ok) return NextResponse.redirect(redirectUrl || this.config.redirectUrl);
 
-            const url = await this.buildAuthUrl();
+            const url = await buildAuthUrl({ apiKey: this.config.apiKey, redirectUrl: `${this.config.baseUrl}/api/auditauth/callback` });
             return NextResponse.redirect(url);
           };
           case 'callback': {

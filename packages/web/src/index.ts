@@ -1,4 +1,4 @@
-import { AuditAuthConfig, CORE_SETTINGS } from "@auditauth/core";
+import { AuditAuthConfig, buildAuthUrl, CORE_SETTINGS } from "@auditauth/core";
 
 type StorageAdapter = {
   get: (name: string) => string | undefined;
@@ -18,6 +18,18 @@ class AuditAuthWeb {
   isAuthenticated() {
     return !!this.storage.get(CORE_SETTINGS.storage_keys.refresh);
   }
+
+  async login() {
+    const url = await buildAuthUrl({
+      apiKey: this.config.apiKey,
+      redirectUrl: this.config.redirectUrl,
+    });
+    window.location.href = url.href;
+  }
+
+
+
+
 }
 
 export { AuditAuthWeb };
