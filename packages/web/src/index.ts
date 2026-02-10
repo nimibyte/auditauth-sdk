@@ -1,4 +1,4 @@
-import { AuditAuthConfig, buildAuthUrl, CORE_SETTINGS } from "@auditauth/core";
+import { AuditAuthConfig, authorizeCode, buildAuthUrl, CORE_SETTINGS } from "@auditauth/core";
 
 type StorageAdapter = {
   get: (name: string) => string | undefined;
@@ -16,7 +16,12 @@ class AuditAuthWeb {
   }
 
   isAuthenticated() {
-    return !!this.storage.get(CORE_SETTINGS.storage_keys.refresh);
+    return !!this.storage.get(CORE_SETTINGS.storage_keys.session);
+  }
+
+  getSessionUser() {
+    const value = this.storage.get(CORE_SETTINGS.storage_keys.session) || '{}';
+    return JSON.parse(value).user;
   }
 
   async login() {
@@ -25,6 +30,24 @@ class AuditAuthWeb {
       redirectUrl: this.config.redirectUrl,
     });
     window.location.href = url.href;
+  }
+
+  async handleRedirect() {
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get('code');
+
+    try {
+      const { data } = await authorizeCode({ code, client_type: 'browser' });
+
+      this.storage.set(CORE_SETTINGS.storage_keys.access, data.access_token);
+      this.storage.set(CORE_SETTINGS.storage_keys.session, JSON.stringify({ user: data.user }));
+
+      url.searchParams.delete('code');
+      window.history.replaceState({}, document.title, url.pathname + url.search);
+    } catch {
+      return null;
+    }
+
   }
 
 

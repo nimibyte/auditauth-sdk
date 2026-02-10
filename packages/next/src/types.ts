@@ -1,19 +1,10 @@
-import { AuditAuthConfig } from "@auditauth/core";
+import { AuditAuthConfig, SessionUser } from "@auditauth/core";
 
 type CredentialResponse = {
   access_token: string;
   access_expires_seconds: number;
   refresh_token: string;
   refresh_expires_seconds: number;
-};
-
-type SessionUser = {
-  _id: string;
-  name: string;
-  email: string;
-  avatar: {
-    url: string | null;
-  };
 };
 
 type Session = {

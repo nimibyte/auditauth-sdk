@@ -10,7 +10,7 @@ import {
   SessionUser
 } from "./types";
 import { SETTINGS } from "./settings";
-import { buildAuthUrl, AuditAuthConfig } from '@auditauth/core';
+import { buildAuthUrl, AuditAuthConfig, authorizeCode } from '@auditauth/core';
 
 /* -------------------------------------------------------------------------- */
 /*                                    KEYS                                    */
@@ -117,59 +117,41 @@ class AuditAuthNext {
   async callback(request: NextRequest) {
     const code = new URL(request.url).searchParams.get('code');
 
-    if (!code) {
+    try {
+      const { data } = await authorizeCode({ code, client_type: 'server' });
+
+      const session: Session = {
+        user: data.user,
+      };
+
+      const isSecure = this.config.redirectUrl.includes('http');
+
+      this.cookies.set(
+        SETTINGS.storage_keys.session,
+        JSON.stringify(session),
+        {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: isSecure,
+          path: '/',
+          maxAge: data.refresh_expires_seconds - 60,
+        },
+      );
+
+      this.setCookieTokens({
+        access_token: data.access_token,
+        access_expires_seconds: data.access_expires_seconds,
+        refresh_token: data.refresh_token!,
+        refresh_expires_seconds: data.refresh_expires_seconds,
+      });
+
+      return { ok: true, url: this.config.redirectUrl };
+    } catch {
       return {
         ok: false,
         url: `${SETTINGS.domains.client}/auth/invalid?reason=wrong_config`,
       };
     }
-
-    const response = await fetch(`${SETTINGS.domains.api}/auth/authorize`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, client_type: 'server' }),
-    });
-
-    if (!response.ok) {
-      return {
-        ok: false,
-        url: `${SETTINGS.domains.client}/auth/invalid?reason=unauthorized`,
-      };
-    }
-
-    const result = await response.json();
-
-    const session: Session = {
-      user: {
-        _id: result.user._id.toString(),
-        email: result.user.email,
-        avatar: result.user.avatar,
-        name: result.user.name,
-      },
-    };
-
-    const isSecure = this.config.redirectUrl.includes('http');
-
-    this.cookies.set(
-      SETTINGS.storage_keys.session,
-      JSON.stringify(session),
-      {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: isSecure,
-        path: '/',
-        maxAge: result.refresh_expires_seconds - 60,
-      },
-    );
-
-    this.setCookieTokens({
-      access_token: result.access_token,
-      access_expires_seconds: result.access_expires_seconds,
-      refresh_token: result.refresh_token,
-      refresh_expires_seconds: result.refresh_expires_seconds,
-    });
-
-    return { ok: true, url: this.config.redirectUrl };
   }
 
   async logout() {
