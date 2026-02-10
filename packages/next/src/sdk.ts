@@ -10,7 +10,7 @@ import {
   SessionUser
 } from "./types";
 import { SETTINGS } from "./settings";
-import { buildAuthUrl, AuditAuthConfig, authorizeCode } from '@auditauth/core';
+import { buildAuthUrl, AuditAuthConfig, authorizeCode, revokeSession } from '@auditauth/core';
 
 /* -------------------------------------------------------------------------- */
 /*                                    KEYS                                    */
@@ -156,12 +156,8 @@ class AuditAuthNext {
 
   async logout() {
     const { access } = this.getCookieTokens();
-    if (access) {
-      await fetch(`${SETTINGS.domains.api}/auth/revoke`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${access}` },
-      }).catch(() => { });
-    }
+
+    await revokeSession({ access_token: access }).catch(() => { });
 
     this.cookies.remove(SETTINGS.storage_keys.access);
     this.cookies.remove(SETTINGS.storage_keys.refresh);

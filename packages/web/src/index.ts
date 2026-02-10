@@ -1,4 +1,4 @@
-import { AuditAuthConfig, authorizeCode, buildAuthUrl, CORE_SETTINGS } from "@auditauth/core";
+import { AuditAuthConfig, authorizeCode, buildAuthUrl, CORE_SETTINGS, revokeSession } from "@auditauth/core";
 
 type StorageAdapter = {
   get: (name: string) => string | undefined;
@@ -24,6 +24,15 @@ class AuditAuthWeb {
     return JSON.parse(value).user;
   }
 
+  async logout() {
+    const access_token = this.storage.get(CORE_SETTINGS.storage_keys.access);
+    await revokeSession({ access_token }).catch(() => {});
+
+    this.storage.remove(CORE_SETTINGS.storage_keys.access);
+    this.storage.remove(CORE_SETTINGS.storage_keys.session);
+    window.location.reload();
+  }
+
   async login() {
     const url = await buildAuthUrl({
       apiKey: this.config.apiKey,
@@ -47,12 +56,7 @@ class AuditAuthWeb {
     } catch {
       return null;
     }
-
   }
-
-
-
-
 }
 
 export { AuditAuthWeb };
