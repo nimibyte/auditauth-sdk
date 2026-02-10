@@ -26,9 +26,9 @@ const getRequestOrigin = async (): Promise<string> => {
 const auditauthFetch = async (url: string, init: RequestInit = {}) => {
   const cookieManager = await cookies();
   const origin = await getRequestOrigin();
-  const access_token = cookieManager.get(SETTINGS.cookies.access.name)?.value;
-  const refresh_token = cookieManager.get(SETTINGS.cookies.refresh.name)?.value;
-  const session_id = cookieManager.get(SETTINGS.cookies.session_id.name)?.value;
+  const access_token = cookieManager.get(SETTINGS.storage_keys.access)?.value;
+  const refresh_token = cookieManager.get(SETTINGS.storage_keys.refresh)?.value;
+  const session_id = cookieManager.get(SETTINGS.storage_keys.session_id)?.value;
 
   const doFetch = (token?: string) =>
     fetch(url, {

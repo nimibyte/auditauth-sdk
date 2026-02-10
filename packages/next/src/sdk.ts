@@ -63,8 +63,8 @@ class AuditAuthNext {
 
   private getCookieTokens() {
     return {
-      access: this.cookies.get(SETTINGS.cookies.access.name),
-      refresh: this.cookies.get(SETTINGS.cookies.refresh.name),
+      access: this.cookies.get(SETTINGS.storage_keys.access),
+      refresh: this.cookies.get(SETTINGS.storage_keys.refresh),
     };
   }
 
@@ -72,7 +72,7 @@ class AuditAuthNext {
     const isSecure = this.config.redirectUrl.includes('https');
 
     this.cookies.set(
-      SETTINGS.cookies.access.name,
+      SETTINGS.storage_keys.access,
       params.access_token,
       {
         httpOnly: true,
@@ -84,7 +84,7 @@ class AuditAuthNext {
     );
 
     this.cookies.set(
-      SETTINGS.cookies.refresh.name,
+      SETTINGS.storage_keys.refresh,
       params.refresh_token,
       {
         httpOnly: true,
@@ -102,12 +102,12 @@ class AuditAuthNext {
 
   getSession(): SessionUser | null {
     return JSON.parse(
-      this.cookies.get(SETTINGS.cookies.session.name) || '{}'
+      this.cookies.get(SETTINGS.storage_keys.session) || '{}'
     )?.user || null;
   }
 
   hasSession(): boolean {
-    return !!this.cookies.get(SETTINGS.cookies.session.name);
+    return !!this.cookies.get(SETTINGS.storage_keys.session);
   }
 
   /* ------------------------------------------------------------------------ */
@@ -168,7 +168,7 @@ class AuditAuthNext {
     const isSecure = this.config.redirectUrl.includes('http');
 
     this.cookies.set(
-      SETTINGS.cookies.session.name,
+      SETTINGS.storage_keys.session,
       JSON.stringify(session),
       {
         httpOnly: true,
@@ -198,9 +198,9 @@ class AuditAuthNext {
       }).catch(() => { });
     }
 
-    this.cookies.remove(SETTINGS.cookies.access.name);
-    this.cookies.remove(SETTINGS.cookies.refresh.name);
-    this.cookies.remove(SETTINGS.cookies.session.name);
+    this.cookies.remove(SETTINGS.storage_keys.access);
+    this.cookies.remove(SETTINGS.storage_keys.refresh);
+    this.cookies.remove(SETTINGS.storage_keys.session);
   }
 
   async getPortalUrl() {
@@ -309,7 +309,7 @@ class AuditAuthNext {
   }
 
   private pushMetric(payload: Metric) {
-    const session_id = this.cookies.get(SETTINGS.cookies.session_id.name);
+    const session_id = this.cookies.get(SETTINGS.storage_keys.session_id);
     queueMicrotask(() => {
       fetch(`${this.config.baseUrl}${SETTINGS.bff.paths.metrics}`, {
         method: 'POST',
@@ -345,9 +345,9 @@ class AuditAuthNext {
     const url = request.nextUrl;
 
     if (access && refresh) {
-      const sid = this.cookies.get(SETTINGS.cookies.session_id.name);
+      const sid = this.cookies.get(SETTINGS.storage_keys.session_id);
       if (!sid) {
-        this.cookies.set(SETTINGS.cookies.session_id.name, crypto.randomUUID(), {
+        this.cookies.set(SETTINGS.storage_keys.session_id, crypto.randomUUID(), {
           httpOnly: true,
           sameSite: 'lax',
           secure: this.config.baseUrl.startsWith('https'),
