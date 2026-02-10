@@ -1,4 +1,4 @@
-import { AuditAuthConfig } from "@auditauth/core";
+import { AuditAuthConfig, CORE_SETTINGS } from "@auditauth/core";
 
 type StorageAdapter = {
   get: (name: string) => string | undefined;
@@ -13,8 +13,10 @@ class AuditAuthWeb {
   constructor(config: AuditAuthConfig, storage: StorageAdapter) {
     this.config = config;
     this.storage = storage;
+  }
 
-    console.log('testlog>>>>', { config, storage });
+  isAuthenticated() {
+    return !!this.storage.get(CORE_SETTINGS.storage_keys.refresh);
   }
 }
 
