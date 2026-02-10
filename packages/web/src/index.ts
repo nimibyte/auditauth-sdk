@@ -1,9 +1,4 @@
-type AuditAuthConfig = {
-  apiKey: string;
-  redirectUrl: string;
-  baseUrl: string;
-  appId: string;
-};
+import { AuditAuthConfig } from "@auditauth/core";
 
 type StorageAdapter = {
   get: (name: string) => string | undefined;
