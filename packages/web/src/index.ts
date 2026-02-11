@@ -1,4 +1,4 @@
-import { AuditAuthConfig, authorizeCode, buildAuthUrl, CORE_SETTINGS, revokeSession } from "@auditauth/core";
+import { AuditAuthConfig, authorizeCode, buildAuthUrl, buildPortalUrl, CORE_SETTINGS, revokeSession } from "@auditauth/core";
 
 type StorageAdapter = {
   get: (name: string) => string | undefined;
@@ -15,21 +15,57 @@ class AuditAuthWeb {
     this.storage = storage;
   }
 
+  private getWithExpiry(key: string) {
+    const itemStr = this.storage.get(key)
+    if (!itemStr) return null
+
+    const item = JSON.parse(itemStr)
+
+    if (Date.now() > item.expiresAt) {
+      this.storage.remove(key)
+      return null
+    }
+
+    return item.value
+  }
+
+  private setWithExpiry(key: string, value: unknown, ttlSeconds: number) {
+    const now = Date.now()
+
+    const item = {
+      value,
+      expiresAt: now + ttlSeconds * 1000,
+    }
+
+    this.storage.set(key, JSON.stringify(item))
+  }
+
   isAuthenticated() {
-    return !!this.storage.get(CORE_SETTINGS.storage_keys.session);
+    return !!this.getWithExpiry(CORE_SETTINGS.storage_keys.session);
   }
 
   getSessionUser() {
-    const value = this.storage.get(CORE_SETTINGS.storage_keys.session) || '{}';
-    return JSON.parse(value).user;
+    const value = this.getWithExpiry(CORE_SETTINGS.storage_keys.session);
+    return value ? value?.user : null;
+  }
+
+  async gotToPortal() {
+    const access_token = this.getWithExpiry(CORE_SETTINGS.storage_keys.access);
+
+    if (!access_token) return this.login();
+
+    const url = await buildPortalUrl({ access_token, redirectUrl: this.config.redirectUrl });
+
+    window.location.href = url.href;
   }
 
   async logout() {
-    const access_token = this.storage.get(CORE_SETTINGS.storage_keys.access);
-    await revokeSession({ access_token }).catch(() => {});
+    const access_token = this.getWithExpiry(CORE_SETTINGS.storage_keys.access);
+    await revokeSession({ access_token }).catch(() => { });
 
     this.storage.remove(CORE_SETTINGS.storage_keys.access);
     this.storage.remove(CORE_SETTINGS.storage_keys.session);
+
     window.location.reload();
   }
 
@@ -38,6 +74,7 @@ class AuditAuthWeb {
       apiKey: this.config.apiKey,
       redirectUrl: this.config.redirectUrl,
     });
+
     window.location.href = url.href;
   }
 
@@ -48,8 +85,9 @@ class AuditAuthWeb {
     try {
       const { data } = await authorizeCode({ code, client_type: 'browser' });
 
-      this.storage.set(CORE_SETTINGS.storage_keys.access, data.access_token);
-      this.storage.set(CORE_SETTINGS.storage_keys.session, JSON.stringify({ user: data.user }));
+      this.setWithExpiry(CORE_SETTINGS.storage_keys.access, data.access_token, data.access_expires_seconds);
+      console.log('testlog>>>>>', { user: data.user });
+      this.setWithExpiry(CORE_SETTINGS.storage_keys.session, { user: data.user }, data.access_expires_seconds);
 
       url.searchParams.delete('code');
       window.history.replaceState({}, document.title, url.pathname + url.search);
