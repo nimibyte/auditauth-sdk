@@ -12,10 +12,8 @@ const sendMetrics = async ({ apiKey, appId, payload }: SendMetricsPayload) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-auditauth-app': appId,
-      'x-auditauth-key': apiKey,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, appId, apiKey }),
   });
 };
 

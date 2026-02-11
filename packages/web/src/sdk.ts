@@ -46,24 +46,51 @@ class AuditAuthWeb {
     return session_id;
   }
 
-  private pushMetric(metric: Metric) {
+  private pushMetric(metric: Omit<Metric, 'session_id'>) {
+    const session_id = this.getSessionId();
 
+    const body = JSON.stringify({
+      appId: this.config.appId,
+      apiKey: this.config.apiKey,
+      session_id,
+      ...metric,
+    });
+
+    const url = `${CORE_SETTINGS.domains.api}/metrics`;
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: 'application/json' })
+      navigator.sendBeacon(url, blob)
+      return
+    }
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => { });
   }
 
   initNavigationTracking() {
-    window.addEventListener('popstate', () => {
-      let session_id = this.getSessionId();
-
+    const track = () => {
       this.pushMetric({
         event_type: 'navigation',
         runtime: 'browser',
-        session_id,
         target: {
           type: 'page',
           path: window.location.pathname,
         },
       });
-    });
+    };
+
+    window.addEventListener('popstate', track);
+
+    const originalPushState = history.pushState;
+    history.pushState = (...args) => {
+      originalPushState.apply(history, args);
+      track();
+    };
   }
 
   async fetch(input: RequestInfo, init: RequestInit = {}) {
@@ -102,7 +129,6 @@ class AuditAuthWeb {
     this.pushMetric({
       event_type: 'request',
       runtime: 'browser',
-      session_id: this.getSessionId(),
       target: {
         type: 'api',
         method: (init.method as RequestMethod) || 'GET',
