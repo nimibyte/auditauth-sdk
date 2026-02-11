@@ -16,8 +16,8 @@ const buildAuthUrl = async ({ apiKey, redirectUrl }: BuildAuthUrlPayload) => {
   });
 
   if (!response.ok) {
-    const asd = await response.text();
-    throw new Error('invalid_app');
+    const error = await response.text();
+    throw new Error(error);
   }
 
   const body = await response.json();

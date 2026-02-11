@@ -10,7 +10,7 @@ import {
   SessionUser
 } from "./types";
 import { SETTINGS } from "./settings";
-import { buildAuthUrl, AuditAuthConfig, authorizeCode, revokeSession } from '@auditauth/core';
+import { buildAuthUrl, AuditAuthConfig, authorizeCode, revokeSession, buildPortalUrl } from '@auditauth/core';
 
 /* -------------------------------------------------------------------------- */
 /*                                    KEYS                                    */
@@ -164,28 +164,23 @@ class AuditAuthNext {
     this.cookies.remove(SETTINGS.storage_keys.session);
   }
 
-  async getPortalUrl() {
+  async getPortalUrl({ redirectUrl }: any) {
     const { access } = this.getCookieTokens();
-    const res = await fetch(`${SETTINGS.domains.api}/portal/exchange`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${access}`,
-      },
-    });
 
-    if (!res.ok && res.status === 401) {
-      return { ok: false, url: null, reason: 'unathorized' };
-    } else if (!res.ok) {
-      return { ok: false, url: null, reason: 'fail' };
+    try {
+      if (!access) throw new Error('Not auth token');
+
+      const url = await buildPortalUrl({ access_token: access, redirectUrl });
+
+      return {
+        ok: true,
+        url,
+        reason: null,
+      };
+    } catch (err: any) {
+      return { ok: false, url: null, reason: err.message };
+
     }
-
-    const body = await res.json();
-
-    return {
-      ok: true,
-      url: `${body.redirectUrl}?code=${body.code}&redirectUrl=${this.config.redirectUrl}`,
-      reason: null,
-    };
   }
 
   /* ------------------------------------------------------------------------ */
@@ -367,7 +362,7 @@ class AuditAuthNext {
             return NextResponse.redirect(this.config.redirectUrl);
           };
           case 'portal': {
-            const { ok, url } = await this.getPortalUrl();
+            const { ok, url } = await this.getPortalUrl({ redirectUrl: this.config.redirectUrl });
             return ok && url
               ? NextResponse.redirect(url)
               : NextResponse.redirect(`${SETTINGS.domains.client}/auth/invalid`);
