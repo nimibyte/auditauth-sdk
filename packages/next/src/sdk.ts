@@ -69,10 +69,6 @@ class AuditAuthNext {
     );
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                              SESSION HELPERS                             */
-  /* ------------------------------------------------------------------------ */
-
   getSession(): SessionUser | null {
     return JSON.parse(
       this.cookies.get(SETTINGS.storage_keys.session) || '{}'
@@ -82,10 +78,6 @@ class AuditAuthNext {
   hasSession(): boolean {
     return !!this.cookies.get(SETTINGS.storage_keys.session);
   }
-
-  /* ------------------------------------------------------------------------ */
-  /*                              AUTH FLOWS                                  */
-  /* ------------------------------------------------------------------------ */
 
   async callback(request: NextRequest) {
     const code = new URL(request.url).searchParams.get('code');
