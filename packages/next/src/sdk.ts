@@ -148,10 +148,7 @@ class AuditAuthNext {
     }
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                         REQUEST WITH AUTO-REFRESH                         */
-  /* ------------------------------------------------------------------------ */
-  async request(url: string, init: RequestInit = {}) {
+  async fetch(url: string, init: RequestInit = {}) {
     const { access, refresh } = this.getCookieTokens();
 
     const doFetch = (token?: string) =>
@@ -193,7 +190,7 @@ class AuditAuthNext {
     return res;
   }
 
-  private pushMetric(payload: Metric) {
+  private pushMetric(payload: Omit<Metric, 'session_id'>) {
     const session_id = this.cookies.get(SETTINGS.storage_keys.session_id);
     queueMicrotask(() => {
       fetch(`${this.config.baseUrl}${SETTINGS.bff.paths.metrics}`, {
