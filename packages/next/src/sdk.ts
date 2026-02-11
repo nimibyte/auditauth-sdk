@@ -1,26 +1,20 @@
 'use server'
 import { NextRequest, NextResponse } from "next/server";
-import { importSPKI, jwtVerify } from 'jose';
-import {
-  CookieAdapter,
-  CredentialResponse,
-  Metric,
-  RequestMethod,
-  Session,
-  SessionUser
-} from "./types";
+import { CookieAdapter, Session } from "./types";
 import { SETTINGS } from "./settings";
-import { buildAuthUrl, AuditAuthConfig, authorizeCode, revokeSession, buildPortalUrl, refreshTokens } from '@auditauth/core';
-
-/* -------------------------------------------------------------------------- */
-/*                                    KEYS                                    */
-/* -------------------------------------------------------------------------- */
-
-let cachedKey: CryptoKey | null = null;
-
-/* -------------------------------------------------------------------------- */
-/*                               MAIN CLASS                                   */
-/* -------------------------------------------------------------------------- */
+import {
+  AuditAuthConfig,
+  CredentialsResponse,
+  buildAuthUrl,
+  authorizeCode,
+  revokeSession,
+  buildPortalUrl,
+  refreshTokens,
+  sendMetrics,
+  SessionUser,
+  RequestMethod,
+  Metric,
+} from '@auditauth/core';
 
 class AuditAuthNext {
   private config: AuditAuthConfig;
@@ -40,27 +34,6 @@ class AuditAuthNext {
     this.cookies = cookies;
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                             AUTH PRIMITIVES                              */
-  /* ------------------------------------------------------------------------ */
-
-  async verifyAccessToken(token: string): Promise<boolean> {
-    try {
-      cachedKey =
-        cachedKey ||
-        await importSPKI(SETTINGS.jwt_public_key, 'RS256') as CryptoKey;
-
-      await jwtVerify(token, cachedKey, {
-        issuer: SETTINGS.jwt_issuer,
-        audience: this.config.appId,
-      });
-
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   private getCookieTokens() {
     return {
       access: this.cookies.get(SETTINGS.storage_keys.access),
@@ -68,7 +41,7 @@ class AuditAuthNext {
     };
   }
 
-  private setCookieTokens(params: CredentialResponse) {
+  private setCookieTokens(params: CredentialsResponse) {
     const isSecure = this.config.redirectUrl.includes('https');
 
     this.cookies.set(
@@ -202,9 +175,14 @@ class AuditAuthNext {
     let res = await doFetch(access);
 
     if (res.status === 401 && refresh) {
-      const data = await refreshTokens({ refresh_token: refresh, client_type: 'server' });
-      if (data?.access_token && data?.refresh_token) {
-        res = await doFetch(data.access_token);
+      const refreshData = await refreshTokens({ refresh_token: refresh, client_type: 'server' });
+
+      if (!refreshData) {
+        return res;
+      }
+
+      if (refreshData.access_token && refreshData.refresh_token) {
+        res = await doFetch(refreshData.access_token);
       }
     }
 
@@ -223,24 +201,6 @@ class AuditAuthNext {
     return res;
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                                METRICS                                    */
-  /* ------------------------------------------------------------------------ */
-
-  async metrics(payload: Metric) {
-    await fetch(`${SETTINGS.domains.api}/metrics`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-auditauth-app': this.config.appId,
-        'x-auditauth-key': this.config.apiKey,
-      },
-      body: JSON.stringify({ ...payload }),
-    });
-
-    return new Response(null, { status: 204 });
-  }
-
   private pushMetric(payload: Metric) {
     const session_id = this.cookies.get(SETTINGS.storage_keys.session_id);
     queueMicrotask(() => {
@@ -251,27 +211,27 @@ class AuditAuthNext {
       }).catch(() => { });
     });
   }
-  /* ------------------------------------------------------------------------ */
-  /*                                METRICS                                    */
-  /* ------------------------------------------------------------------------ */
 
   async refresh() {
     const { refresh } = this.getCookieTokens();
 
     if (!refresh) return { ok: false };
 
-    const result = await this.refreshRequest(refresh);
+    const result = await refreshTokens({ refresh_token: refresh, client_type: 'server' });
 
     if (!result) return { ok: false };
 
-    this.setCookieTokens(result);
+    const { access_token, refresh_token, access_expires_seconds, refresh_expires_seconds } = result;
+
+    this.setCookieTokens({
+      access_token,
+      access_expires_seconds,
+      refresh_token,
+      refresh_expires_seconds,
+    });
 
     return { ok: true };
   }
-
-  /* ------------------------------------------------------------------------ */
-  /*                               MIDDLEWARE                                  */
-  /* ------------------------------------------------------------------------ */
 
   async middleware(request: NextRequest) {
     const { access, refresh } = this.getCookieTokens();
@@ -307,10 +267,6 @@ class AuditAuthNext {
 
     return NextResponse.next();
   }
-
-  /* ------------------------------------------------------------------------ */
-  /*                               BFF HANDLERS                               */
-  /* ------------------------------------------------------------------------ */
 
   getHandlers() {
     return {
@@ -358,7 +314,13 @@ class AuditAuthNext {
       POST: async (req: Request, ctx: { params: Promise<{ auditauth: string[] }> }) => {
         const action = (await ctx.params).auditauth[0];
         if (action === 'metrics') {
-          return this.metrics(await req.json());
+          const payload = await req.json();
+          await sendMetrics({
+            payload,
+            appId: this.config.appId,
+            apiKey: this.config.apiKey,
+          })
+          return new Response(null, { status: 204 });
         }
         return new Response('not found', { status: 404 });
       },

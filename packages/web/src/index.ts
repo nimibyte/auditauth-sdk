@@ -1,4 +1,4 @@
-import { AuditAuthConfig, authorizeCode, buildAuthUrl, buildPortalUrl, CORE_SETTINGS, revokeSession } from "@auditauth/core";
+import { AuditAuthConfig, authorizeCode, buildAuthUrl, buildPortalUrl, CORE_SETTINGS, refreshTokens, revokeSession } from "@auditauth/core";
 
 type StorageAdapter = {
   get: (name: string) => string | undefined;
@@ -38,6 +38,41 @@ class AuditAuthWeb {
     }
 
     this.storage.set(key, JSON.stringify(item))
+  }
+
+  async fetch(input: RequestInfo, init: RequestInit = {}) {
+    let access = this.getWithExpiry(CORE_SETTINGS.storage_keys.access)
+
+    const doFetch = (token?: string) =>
+      fetch(input, {
+        ...init,
+        credentials: 'include',
+        headers: {
+          ...init.headers,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+
+    let res = await doFetch(access || undefined)
+
+    if (res.status === 401) {
+      const refreshData = await refreshTokens({ client_type: 'browser' });
+
+      if (!refreshData) {
+        await this.logout()
+        return res
+      }
+
+      this.setWithExpiry(
+        CORE_SETTINGS.storage_keys.access,
+        refreshData.access_token,
+        refreshData.access_expires_seconds
+      )
+
+      res = await doFetch(refreshData.access_token)
+    }
+
+    return res
   }
 
   isAuthenticated() {

@@ -3,3 +3,4 @@ export type * from './types';
 
 export * from './auth';
 export * from './portal';
+export * from './metrics';

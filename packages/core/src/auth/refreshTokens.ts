@@ -1,11 +1,12 @@
 import { CORE_SETTINGS } from "../settings";
+import { CredentialsResponse } from "../types";
 
 type RefreshTokensPayload = {
   client_type: 'browser' | 'server';
   refresh_token?: string;
 };
 
-const refreshTokens = async ({ client_type, refresh_token }: RefreshTokensPayload) => {
+const refreshTokens = async ({ client_type, refresh_token }: RefreshTokensPayload): Promise<CredentialsResponse | null> => {
   const response = await fetch(`${CORE_SETTINGS.domains.api}/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
@@ -15,7 +16,8 @@ const refreshTokens = async ({ client_type, refresh_token }: RefreshTokensPayloa
 
   if (!response.ok) return null
 
-  return response.json()
+  const data = await response.json() as CredentialsResponse;
+  return data;
 };
 
 export default refreshTokens;

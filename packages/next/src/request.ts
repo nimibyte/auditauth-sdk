@@ -2,8 +2,8 @@
 
 import { cookies } from "next/headers";
 import { SETTINGS } from "./settings";
-import { RequestMethod } from "./types";
 import { headers } from 'next/headers';
+import { refreshTokens, RequestMethod } from "@auditauth/core";
 
 const getRequestOrigin = async (): Promise<string> => {
   const h = await headers();
@@ -44,21 +44,14 @@ const auditauthFetch = async (url: string, init: RequestInit = {}) => {
   let response = await doFetch(access_token);
 
   if (response.status === 401 && refresh_token) {
-    const refreshResponse = await fetch(`${SETTINGS.domains.api}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        refresh_token,
-        client_type: 'server',
-      }),
-    });
+    const refreshData = await refreshTokens({ refresh_token, client_type: 'server' });
 
-    if (!refreshResponse.ok) return response;
+    if (!refreshData) {
+      return response;
+    }
 
-    const data = await refreshResponse.json();
-
-    if (data?.access_token && data?.refresh_token) {
-      response = await doFetch(data.access_token);
+    if (refreshData.access_token && refreshData.refresh_token) {
+      response = await doFetch(refreshData.access_token);
     }
   }
 
