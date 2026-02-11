@@ -10,7 +10,7 @@ import {
   SessionUser
 } from "./types";
 import { SETTINGS } from "./settings";
-import { buildAuthUrl, AuditAuthConfig, authorizeCode, revokeSession, buildPortalUrl } from '@auditauth/core';
+import { buildAuthUrl, AuditAuthConfig, authorizeCode, revokeSession, buildPortalUrl, refreshTokens } from '@auditauth/core';
 
 /* -------------------------------------------------------------------------- */
 /*                                    KEYS                                    */
@@ -184,31 +184,8 @@ class AuditAuthNext {
   }
 
   /* ------------------------------------------------------------------------ */
-  /*                              REFRESH FLOW                                 */
-  /* ------------------------------------------------------------------------ */
-
-  private async refreshRequest(refreshToken: string): Promise<CredentialResponse | null> {
-    try {
-      const response = await fetch(`${SETTINGS.domains.api}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refresh_token: refreshToken,
-          client_type: 'server',
-        }),
-      });
-
-      if (!response.ok) return null;
-      return response.json();
-    } catch {
-      return null;
-    }
-  }
-
-  /* ------------------------------------------------------------------------ */
   /*                         REQUEST WITH AUTO-REFRESH                         */
   /* ------------------------------------------------------------------------ */
-
   async request(url: string, init: RequestInit = {}) {
     const { access, refresh } = this.getCookieTokens();
 
@@ -225,7 +202,7 @@ class AuditAuthNext {
     let res = await doFetch(access);
 
     if (res.status === 401 && refresh) {
-      const data = await this.refreshRequest(refresh);
+      const data = await refreshTokens({ refresh_token: refresh, client_type: 'server' });
       if (data?.access_token && data?.refresh_token) {
         res = await doFetch(data.access_token);
       }
