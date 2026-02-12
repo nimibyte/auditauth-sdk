@@ -46,7 +46,7 @@ class AuditAuthWeb {
     return session_id;
   }
 
-  private pushMetric(metric: Omit<Metric, 'session_id'>) {
+  pushMetric(metric: Omit<Metric, 'session_id'>) {
     const session_id = this.getSessionId();
 
     const body = JSON.stringify({

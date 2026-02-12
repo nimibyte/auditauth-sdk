@@ -1,0 +1,31 @@
+{
+  "name": "@auditauth/node",
+  "version": "0.1.0",
+  "description": "AuditAuth Node SDK - JWT verification",
+  "license": "MIT",
+  "author": "Nimibyte",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "jose": "^5.2.0",
+    "@auditauth/core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.0"
+  }
+}

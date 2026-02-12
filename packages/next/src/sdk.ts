@@ -69,6 +69,17 @@ class AuditAuthNext {
     );
   }
 
+  private pushMetric(payload: Omit<Metric, 'session_id'>) {
+    const session_id = this.cookies.get(SETTINGS.storage_keys.session_id);
+    queueMicrotask(() => {
+      fetch(`${this.config.baseUrl}${SETTINGS.bff.paths.metrics}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, session_id }),
+      }).catch(() => { });
+    });
+  }
+
   getSession(): SessionUser | null {
     return JSON.parse(
       this.cookies.get(SETTINGS.storage_keys.session) || '{}'
@@ -190,17 +201,6 @@ class AuditAuthNext {
     return res;
   }
 
-  private pushMetric(payload: Omit<Metric, 'session_id'>) {
-    const session_id = this.cookies.get(SETTINGS.storage_keys.session_id);
-    queueMicrotask(() => {
-      fetch(`${this.config.baseUrl}${SETTINGS.bff.paths.metrics}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, session_id }),
-      }).catch(() => { });
-    });
-  }
-
   async refresh() {
     const { refresh } = this.getCookieTokens();
 
@@ -268,6 +268,7 @@ class AuditAuthNext {
             const url = await buildAuthUrl({ apiKey: this.config.apiKey, redirectUrl: `${this.config.baseUrl}/api/auditauth/callback` });
             return NextResponse.redirect(url);
           };
+
           case 'refresh': {
             const { ok } = await this.refresh();
             if (ok) return NextResponse.redirect(redirectUrl || this.config.redirectUrl);
@@ -275,25 +276,30 @@ class AuditAuthNext {
             const url = await buildAuthUrl({ apiKey: this.config.apiKey, redirectUrl: `${this.config.baseUrl}/api/auditauth/callback` });
             return NextResponse.redirect(url);
           };
+
           case 'callback': {
             const { url } = await this.callback(req);
             return NextResponse.redirect(url);
           };
+
           case 'logout': {
             await this.logout();
             return NextResponse.redirect(this.config.redirectUrl);
           };
+
           case 'portal': {
             const { ok, url } = await this.getPortalUrl({ redirectUrl: this.config.redirectUrl });
             return ok && url
               ? NextResponse.redirect(url)
               : NextResponse.redirect(`${SETTINGS.domains.client}/auth/invalid`);
           };
+
           case 'session': {
             const user = this.getSession();
             if (!user) return new NextResponse(null, { status: 401 });
             return NextResponse.json({ user });
           };
+
           default: {
             return new Response('not found', { status: 404 });
           };
@@ -315,7 +321,6 @@ class AuditAuthNext {
       },
     };
   }
-
 }
 
 export { AuditAuthNext };

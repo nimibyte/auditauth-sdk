@@ -14,6 +14,12 @@
     "build:web": "npm run build -w @auditauth/web",
     "dev:web": "npm run dev -w @auditauth/web",
 
+    "build:node": "npm run build -w @auditauth/node",
+    "dev:node": "npm run dev -w @auditauth/node",
+
+    "build:react": "npm run build -w @auditauth/react",
+    "dev:react": "npm run dev -w @auditauth/react",
+
     "build:core": "npm run build -w @auditauth/core",
     "dev:core": "npm run dev -w @auditauth/core"
   },
