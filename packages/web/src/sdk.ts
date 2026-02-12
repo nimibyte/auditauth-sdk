@@ -46,7 +46,7 @@ class AuditAuthWeb {
     return session_id;
   }
 
-  pushMetric(metric: Omit<Metric, 'session_id'>) {
+  private pushMetric(metric: Omit<Metric, 'session_id'>) {
     const session_id = this.getSessionId();
 
     const body = JSON.stringify({
@@ -70,6 +70,17 @@ class AuditAuthWeb {
       body,
       keepalive: true,
     }).catch(() => { });
+  }
+
+  trackNavigationPath(path: string) {
+    this.pushMetric({
+      event_type: 'navigation',
+      runtime: 'browser',
+      target: {
+        type: 'page',
+        path: path,
+      },
+    });
   }
 
   initNavigationTracking() {
@@ -155,7 +166,7 @@ class AuditAuthWeb {
     return value ? value?.user : null;
   }
 
-  async gotToPortal() {
+  async goToPortal() {
     const access_token = this.getWithExpiry(CORE_SETTINGS.storage_keys.access);
 
     if (!access_token) return this.login();

@@ -124,18 +124,9 @@ const AuditAuthProvider = ({ config, children }: AuditAuthProviderProps) => {
       fetch: fetchWrapper,
       login: sdk.login.bind(sdk),
       logout,
-      goToPortal: sdk.gotToPortal.bind(sdk),
+      goToPortal: sdk.goToPortal.bind(sdk),
       isAuthenticated: () => !!user,
-      trackNavigationPath: (path: string) => {
-        sdk.pushMetric({
-          event_type: 'navigation',
-          runtime: 'browser',
-          target: {
-            type: 'page',
-            path,
-          },
-        })
-      },
+      trackNavigationPath: sdk.trackNavigationPath.bind(sdk),
     }
   }, [ready, user, sdk, logout, fetchWrapper])
 
