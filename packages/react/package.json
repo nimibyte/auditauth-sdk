@@ -4,6 +4,7 @@
   "description": "AuditAuth React SDK",
   "license": "MIT",
   "author": "Nimibyte",
+  "module": "dist/index.js",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,9 +14,10 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    }
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -27,7 +29,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@auditauth/web": "*"
+    "@auditauth/web": "^0.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

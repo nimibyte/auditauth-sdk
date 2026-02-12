@@ -4,6 +4,7 @@
   "description": "AuditAuth Node SDK - JWT verification",
   "license": "MIT",
   "author": "Nimibyte",
+  "module": "dist/index.js",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +23,7 @@
   },
   "dependencies": {
     "jose": "^5.2.0",
-    "@auditauth/core": "*"
+    "@auditauth/core": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

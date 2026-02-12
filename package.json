@@ -2,26 +2,34 @@
   "name": "auditauth-sdk",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "build": "npm run build -ws",
-    "dev": "npm run dev -ws",
 
-    "build:next": "npm run build -w @auditauth/next",
-    "dev:next": "npm run dev -w @auditauth/next",
+    "build:core": "npm run build -w @auditauth/core",
+    "dev:core": "npm run dev -w @auditauth/core",
 
     "build:web": "npm run build -w @auditauth/web",
     "dev:web": "npm run dev -w @auditauth/web",
 
-    "build:node": "npm run build -w @auditauth/node",
-    "dev:node": "npm run dev -w @auditauth/node",
-
     "build:react": "npm run build -w @auditauth/react",
     "dev:react": "npm run dev -w @auditauth/react",
 
-    "build:core": "npm run build -w @auditauth/core",
-    "dev:core": "npm run dev -w @auditauth/core"
+    "build:node": "npm run build -w @auditauth/node",
+    "dev:node": "npm run dev -w @auditauth/node",
+
+    "build:next": "npm run build -w @auditauth/next",
+    "dev:next": "npm run dev -w @auditauth/next",
+
+    "dev:example-vanilla": "npm run dev -w example-vanilla",
+    "build:example-vanilla": "npm run build -w example-vanilla",
+    "preview:example-vanilla": "npm run preview -w example-vanilla",
+
+    "dev:example-react": "npm run dev -w example-react",
+    "build:example-react": "npm run build -w example-react",
+    "preview:example-react": "npm run preview -w example-react"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
