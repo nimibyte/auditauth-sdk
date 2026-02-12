@@ -12,6 +12,7 @@ const CORE_SETTINGS = {
     session: 'auditauth_session',
     refresh: 'auditauth_refresh',
     session_id: 'auditauth_sid',
+    sync: '__auditauth_sync__',
   }
 } as const;
 
