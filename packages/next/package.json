@@ -28,7 +28,8 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@auditauth/core": "^0.1.0"
+    "@auditauth/core": "^0.1.0",
+    "@auditauth/node": "^0.1.0"
   },
   "devDependencies": {
     "typescript": "^5.9.0",

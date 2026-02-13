@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { auditauth } from '@/providers/auth';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
-  console.log('---- PROTECTED TEST ENDPOINT ----')
-  console.log('Headers:', Object.fromEntries(req.headers.entries()))
-  console.log('Cookies:', req.cookies.getAll())
-
-  return NextResponse.json({
-    ok: true,
-    message: 'Protected test endpoint reached',
-  })
-}
+export const GET = auditauth.withAuthRequest(
+  async (_req: NextRequest, _ctx, session) => {
+    return NextResponse.json({
+      ok: true,
+      user_email: session.email,
+    });
+  }
+);

@@ -15,6 +15,7 @@ import {
   RequestMethod,
   Metric,
 } from '@auditauth/core';
+import { AuditAuthTokenPayload, verifyRequest } from "@auditauth/node";
 
 class AuditAuthNext {
   private config: AuditAuthConfig;
@@ -155,6 +156,27 @@ class AuditAuthNext {
     if (!access) return;
 
     await revokeSession({ access_token: access }).catch(() => { });
+  }
+
+  withAuthRequest<C>(
+    handler: (
+      req: NextRequest,
+      ctx: C,
+      session: AuditAuthTokenPayload,
+    ) => Promise<Response>
+  ) {
+    return async (req: NextRequest, ctx: C) => {
+      try {
+        const session = await verifyRequest({
+          request: req,
+          appId: this.config.appId,
+        });
+
+        return handler(req, ctx, session);
+      } catch {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    };
   }
 
   async fetch(url: string, init: RequestInit = {}) {

@@ -30,7 +30,7 @@ export default function ApiTester() {
       const res = await fetch(path, {
         credentials: 'include',
       })
-
+;
       const data = await res.json()
 
       setResult(JSON.stringify(data, null, 2))
