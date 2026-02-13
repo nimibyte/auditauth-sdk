@@ -12,6 +12,7 @@ export default function ApiTester() {
     setResult(null)
 
     try {
+      console.log('testlog>>>>>init');
       const data = await testAuthCall(path);
 
       setResult(JSON.stringify(data, null, 2))

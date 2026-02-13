@@ -16,6 +16,7 @@ import {
   Metric,
 } from '@auditauth/core';
 import { AuditAuthTokenPayload, verifyRequest } from "@auditauth/node";
+import { ok } from "assert";
 
 class AuditAuthNext {
   private config: AuditAuthConfig;
@@ -173,7 +174,7 @@ class AuditAuthNext {
         });
 
         return handler(req, ctx, session);
-      } catch {
+      } catch (err) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     };
@@ -272,9 +273,16 @@ class AuditAuthNext {
       return NextResponse.next();
     }
 
-    if (!refresh) return NextResponse.redirect(new URL(SETTINGS.bff.paths.login, request.url));
+    if (!refresh) {
+      if (request.method !== 'GET') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL(SETTINGS.bff.paths.login, request.url));
+    }
 
-    if (refresh && !access) return NextResponse.redirect(new URL(`${SETTINGS.bff.paths.refresh}?redirectUrl=${url}`, request.url));
+    if (refresh && !access) {
+      return NextResponse.redirect(new URL(`${SETTINGS.bff.paths.refresh}?redirectUrl=${url}`, request.url));
+    }
 
     return NextResponse.next();
   }
@@ -336,18 +344,32 @@ class AuditAuthNext {
         }
       },
 
-      POST: async (req: Request, ctx: { params: Promise<{ auditauth: string[] }> }) => {
+      POST: async (req: NextRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => {
         const action = (await ctx.params).auditauth[0];
-        if (action === 'metrics') {
-          const payload = await req.json();
-          await sendMetrics({
-            payload,
-            appId: this.config.appId,
-            apiKey: this.config.apiKey,
-          })
-          return new Response(null, { status: 204 });
-        }
-        return new Response('not found', { status: 404 });
+
+        switch (action) {
+          case 'metrics': {
+            const payload = await req.json();
+            await sendMetrics({
+              payload,
+              appId: this.config.appId,
+              apiKey: this.config.apiKey,
+            })
+            return new Response(null, { status: 204 });
+          };
+
+          case 'refresh': {
+            const redirectUrl = req.nextUrl.searchParams.get('redirectUrl');
+            const { ok } = await this.refresh();
+            if (ok) return NextResponse.redirect(redirectUrl || this.config.redirectUrl);
+
+            return new Response('Session expired', { status: 401 });
+          };
+
+          default: {
+            return new Response('not found', { status: 404 });
+          };
+        };
       },
     };
   }

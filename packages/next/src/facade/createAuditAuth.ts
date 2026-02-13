@@ -9,7 +9,7 @@ import type { AuditAuthTokenPayload } from '@auditauth/node';
 type AuditAuthNextFacade = {
   handlers: {
     GET: (req: NextRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => Promise<Response>;
-    POST: (req: Request, ctx: { params: Promise<{ auditauth: string[] }> }) => Promise<Response>;
+    POST: (req: NextRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => Promise<Response>;
   };
   middleware: (req: NextRequest) => Promise<NextResponse>;
   getSession: () => Promise<SessionUser | null>;
