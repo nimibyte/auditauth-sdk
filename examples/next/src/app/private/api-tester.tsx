@@ -12,7 +12,6 @@ export default function ApiTester() {
     setResult(null)
 
     try {
-      console.log('testlog>>>>>init');
       const data = await testAuthCall(path);
 
       setResult(JSON.stringify(data, null, 2))
@@ -59,13 +58,6 @@ export default function ApiTester() {
           onClick={() => authCall('/api/test/protected')}
         >
           Auth fetch
-        </button>
-
-        <button
-          className="button button-primary"
-          onClick={() => authCall('/api/test/refresh')}
-        >
-          Refresh fetch
         </button>
       </div>
 
