@@ -23,11 +23,15 @@
     "build:next": "npm run build -w @auditauth/next",
     "dev:next": "npm run dev -w @auditauth/next",
 
-    "dev:example-vanilla": "npm run dev -w example-vanilla",
+    "dev:example-vanilla": "npm run dev -w example-vanilla -- --port 5173",
     "build:example-vanilla": "npm run build -w example-vanilla",
     "preview:example-vanilla": "npm run preview -w example-vanilla",
 
-    "dev:example-react": "npm run dev -w example-react",
+    "dev:example-next": "npm run dev -w example-next -- --port 5173",
+    "build:example-next": "npm run build -w example-next",
+    "preview:example-next": "npm run preview -w example-next",
+
+    "dev:example-react": "npm run dev -w example-react -- --port 5173",
     "build:example-react": "npm run build -w example-react",
     "preview:example-react": "npm run preview -w example-react"
   },

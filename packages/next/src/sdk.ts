@@ -90,7 +90,22 @@ class AuditAuthNext {
     return !!this.cookies.get(SETTINGS.storage_keys.session);
   }
 
-  async callback(request: NextRequest) {
+  getLoginUrl(): URL {
+    const url = new URL(SETTINGS.bff.paths.login, this.config.baseUrl);
+    return url;
+  }
+
+  getLogoutUrl(): URL {
+    const url = new URL(SETTINGS.bff.paths.logout, this.config.baseUrl);
+    return url;
+  }
+
+  getPortalUrl(): URL {
+    const url = new URL(SETTINGS.bff.paths.portal, this.config.baseUrl);
+    return url;
+  }
+
+  private async callback(request: NextRequest) {
     const code = new URL(request.url).searchParams.get('code');
 
     try {
@@ -130,33 +145,16 @@ class AuditAuthNext {
     }
   }
 
-  async logout() {
+  private async logout() {
     const { access } = this.getCookieTokens();
-
-    await revokeSession({ access_token: access }).catch(() => { });
 
     this.cookies.remove(SETTINGS.storage_keys.access);
     this.cookies.remove(SETTINGS.storage_keys.refresh);
     this.cookies.remove(SETTINGS.storage_keys.session);
-  }
 
-  async getPortalUrl({ redirectUrl }: any) {
-    const { access } = this.getCookieTokens();
+    if (!access) return;
 
-    try {
-      if (!access) throw new Error('Not auth token');
-
-      const url = await buildPortalUrl({ access_token: access, redirectUrl });
-
-      return {
-        ok: true,
-        url,
-        reason: null,
-      };
-    } catch (err: any) {
-      return { ok: false, url: null, reason: err.message };
-
-    }
+    await revokeSession({ access_token: access }).catch(() => { });
   }
 
   async fetch(url: string, init: RequestInit = {}) {
@@ -201,7 +199,7 @@ class AuditAuthNext {
     return res;
   }
 
-  async refresh() {
+  private async refresh() {
     const { refresh } = this.getCookieTokens();
 
     if (!refresh) return { ok: false };
@@ -288,10 +286,18 @@ class AuditAuthNext {
           };
 
           case 'portal': {
-            const { ok, url } = await this.getPortalUrl({ redirectUrl: this.config.redirectUrl });
-            return ok && url
-              ? NextResponse.redirect(url)
-              : NextResponse.redirect(`${SETTINGS.domains.client}/auth/invalid`);
+            const { access } = this.getCookieTokens();
+
+            try {
+              if (!access) throw new Error('Not auth token');
+
+              const url = await buildPortalUrl({ access_token: access, redirectUrl: this.config.redirectUrl });
+
+              return NextResponse.redirect(url);
+            } catch (err: any) {
+              return NextResponse.redirect(`${SETTINGS.domains.client}/auth/invalid`);
+
+            }
           };
 
           case 'session': {
