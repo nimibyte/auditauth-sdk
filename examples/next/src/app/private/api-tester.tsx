@@ -1,12 +1,28 @@
 'use client'
 
 import { useState } from 'react'
+import { testAuthCall } from './actions';
 
 export default function ApiTester() {
   const [result, setResult] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const callApi = async (path: string) => {
+  const authCall = async (path: string) => {
+    setLoading(true)
+    setResult(null)
+
+    try {
+      const data = await testAuthCall(path);
+
+      setResult(JSON.stringify(data, null, 2))
+    } catch {
+      setResult('Request failed')
+    } finally {
+      setLoading(false)
+    }
+  };
+
+  const regularCall = async (path: string) => {
     setLoading(true)
     setResult(null)
 
@@ -18,7 +34,7 @@ export default function ApiTester() {
       const data = await res.json()
 
       setResult(JSON.stringify(data, null, 2))
-    } catch (err) {
+    } catch {
       setResult('Request failed')
     } finally {
       setLoading(false)
@@ -32,21 +48,21 @@ export default function ApiTester() {
       <div style={{ display: 'flex', gap: 16 }}>
         <button
           className="button button-primary"
-          onClick={() => callApi('/api/test/protected')}
+          onClick={() => regularCall('/api/test/protected')}
         >
           Normal fetch
         </button>
 
         <button
           className="button button-primary"
-          onClick={() => callApi('/api/test/protected')}
+          onClick={() => authCall('/api/test/protected')}
         >
           Auth fetch
         </button>
 
         <button
           className="button button-primary"
-          onClick={() => callApi('/api/test/refresh')}
+          onClick={() => authCall('/api/test/refresh')}
         >
           Refresh fetch
         </button>

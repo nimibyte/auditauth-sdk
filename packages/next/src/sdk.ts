@@ -160,8 +160,10 @@ class AuditAuthNext {
   async fetch(url: string, init: RequestInit = {}) {
     const { access, refresh } = this.getCookieTokens();
 
+    const finalUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
+
     const doFetch = (token?: string) =>
-      fetch(url, {
+      fetch(finalUrl, {
         ...init,
         headers: {
           ...init.headers,
