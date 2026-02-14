@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js example (`example-next`)
 
-## Getting Started
+This example shows a complete App Router integration with `@auditauth/next`.
+It includes SDK route handlers, middleware protection, server-side session
+access, authenticated server requests, and protected API route handlers.
 
-First, run the development server:
+## Run the example
+
+From the repository root, run the Next.js example workspace.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev:example-next
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app starts on `http://localhost:5173`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## What this example demonstrates
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This example maps each integration concern to one file so you can copy patterns
+into your own app.
 
-## Learn More
+- SDK provider setup in `src/providers/auth.ts`
+- Auth API handlers in `src/app/api/auditauth/[...auditauth]/route.ts`
+- Middleware protection in `src/proxy.ts`
+- Session read in `src/app/private/page.tsx`
+- Protected API route with token verification in
+  `src/app/api/test/protected/route.ts`
+- Server-side authenticated request in `src/app/private/actions.ts`
 
-To learn more about Next.js, take a look at the following resources:
+## Main integration flow
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The example follows the standard flow used by `@auditauth/next`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Create one `auditauth` instance with `createAuditAuthNext()`.
+2. Export `GET` and `POST` handlers from `auditauth.handlers`.
+3. Route private pages through `auditauth.middleware()`.
+4. Read user session with `auditauth.getSession()` in server components.
+5. Use `auditauth.fetch()` for server-to-server protected API calls.
+6. Wrap sensitive route handlers with `auditauth.withAuthRequest()`.
 
-## Deploy on Vercel
+## Important note
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This example currently contains hardcoded sample credentials for local
+development only. Replace them with environment variables before using the
+pattern in a real project.

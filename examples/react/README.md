@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# React example (`example-react`)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This example shows how to integrate `@auditauth/react` in a Vite and
+React Router app. It demonstrates provider setup, route-level auth guard,
+session actions, and authenticated API requests.
 
-Currently, two official plugins are available:
+## Run the example
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+From the repository root, run the React workspace.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev:example-react
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The app starts on `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## What this example demonstrates
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+This example maps each integration step to a simple file structure.
+
+- Provider setup in `src/App.tsx`
+- Router-level navigation metrics in `NavigationTracker`
+- Public page in `src/pages/public.tsx`
+- Protected page with `RequireAuth` in `src/pages/private.tsx`
+- Session actions with `logout()` and `goToPortal()`
+- Authenticated API calls using `useAuditAuth().fetch()`
+
+## Main integration flow
+
+The React example uses the same SDK lifecycle you would use in production.
+
+1. Wrap your app with `AuditAuthProvider` and pass the SDK config.
+2. Use `RequireAuth` for private routes.
+3. Read user info from `useAuditAuth().user`.
+4. Use `useAuditAuth().fetch()` for authenticated HTTP calls.
+5. Track route changes with `trackNavigationPath()`.
+
+## Important note
+
+This example currently contains hardcoded sample credentials for local
+development only. Replace them with environment variables before using the
+pattern in a real project.

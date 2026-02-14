@@ -5,104 +5,210 @@
 <h1 align="center">AuditAuth SDK</h1>
 
 <p align="center">
-  Identity & Session Infrastructure for modern applications.
+  Identity and session infrastructure for modern applications.
 </p>
 
----
+## What this SDK gives you
 
-## Overview
+AuditAuth SDK helps you implement authentication flows with a consistent API
+across browser and server runtimes. You get login, callback handling, token
+refresh, session state, logout, and request and navigation metrics.
 
-**AuditAuth SDK** is a modular identity and session infrastructure designed to provide consistent authentication, session management, token lifecycle handling, and navigation-level observability across different runtimes.
+The SDK is modular. You can pick only what you need:
 
-This repository contains the core SDK packages and official integration examples.
+- `@auditauth/web` for framework-agnostic browser apps
+- `@auditauth/react` for React apps
+- `@auditauth/next` for Next.js App Router apps
+- `@auditauth/node` for token verification in Node runtimes
 
-It is framework-agnostic at its foundation and provides dedicated adapters for specific environments.
+## Monorepo structure
 
----
+This repository is an npm workspace monorepo with SDK packages and runnable
+examples.
 
-## Architecture
-
-The SDK is organized as a monorepo containing multiple packages:
-
-```
+```text
 packages/
-  core     → Shared identity primitives and protocol logic
-  web      → Framework-agnostic browser SDK
-  react    → React integration layer
-  node     → Server-side JWT verification utilities
-  next     → Next.js integration layer
+  core   Shared protocol logic and shared types
+  web    Browser SDK
+  react  React provider and auth guard
+  node   JWT verification helpers
+  next   Next.js integration
 
 examples/
-  vanilla  → Web SDK integration example
-  react    → React SDK integration example
+  vanilla  Web SDK example
+  react    React SDK example
+  next     Next.js SDK example
 ```
 
-Each package has its own README with detailed usage instructions.
+## Install
 
----
+Install the package for your runtime.
 
-## Design Goals
+```bash
+npm install @auditauth/web
+# or
+npm install @auditauth/react
+# or
+npm install @auditauth/next
+```
 
-- Runtime-agnostic core identity logic
-- Explicit session lifecycle management
-- Token refresh orchestration
-- Cross-tab session synchronization
-- Minimal assumptions about application architecture
-- Clear separation between protocol logic and framework adapters
+## Shared config
 
-AuditAuth is not just an authentication helper.  
-It is an identity and session coordination layer intended to sit between your application and your identity backend.
+All integrations use the same base config shape, so it is easy to move between
+frameworks.
 
----
+```ts
+type AuditAuthConfig = {
+  apiKey: string
+  appId: string
+  baseUrl: string
+  redirectUrl: string
+}
+```
 
-## Packages
+- `apiKey`: AuditAuth API key for your application
+- `appId`: AuditAuth application identifier
+- `baseUrl`: your app origin, for example `http://localhost:5173`
+- `redirectUrl`: post-login page in your app
 
-| Package | Description |
-|----------|-------------|
-| `@auditauth/core` | Shared protocol logic and identity primitives |
-| `@auditauth/web` | Browser SDK (framework-agnostic) |
-| `@auditauth/react` | React bindings for the Web SDK |
-| `@auditauth/node` | Server-side verification utilities |
-| `@auditauth/next` | Next.js integration layer |
+## Quick start by framework
 
----
+Use one of these integration patterns as your starting point.
 
-## Examples
+### Browser apps (`@auditauth/web`)
 
-Official examples are included in this repository:
+The Web SDK is the lowest-level browser integration. You create an instance,
+wire a storage adapter, handle redirects, and call helper methods.
 
-- `examples/vanilla` – Minimal framework-agnostic integration
-- `examples/react` – React integration example
+```ts
+import { AuditAuthWeb } from '@auditauth/web'
 
-These examples demonstrate:
+const auditauth = new AuditAuthWeb(
+  {
+    apiKey: process.env.AUDITAUTH_API_KEY!,
+    appId: process.env.AUDITAUTH_APP_ID!,
+    baseUrl: 'http://localhost:5173',
+    redirectUrl: 'http://localhost:5173/private',
+  },
+  {
+    get: (name) => localStorage.getItem(name),
+    set: (name, value) => localStorage.setItem(name, value),
+    remove: (name) => localStorage.removeItem(name),
+  }
+)
 
-- Authentication flow
-- Session persistence
-- Token refresh handling
-- Cross-tab synchronization
-- Navigation metrics
+await auditauth.handleRedirect()
+```
 
-They are integration references, not UI showcases.
+### React apps (`@auditauth/react`)
 
----
+The React package wraps `@auditauth/web` in a provider and hooks API.
 
-## Development
+```tsx
+import { AuditAuthProvider } from '@auditauth/react'
 
-This repository uses **npm workspaces**.
+<AuditAuthProvider
+  config={{
+    apiKey: process.env.VITE_AUDITAUTH_API_KEY!,
+    appId: process.env.VITE_AUDITAUTH_APP_ID!,
+    baseUrl: 'http://localhost:5173',
+    redirectUrl: 'http://localhost:5173/private',
+  }}
+>
+  <App />
+</AuditAuthProvider>
+```
 
-Install dependencies from the root:
+Use `useAuditAuth()` in child components to access `user`, `login`, `logout`,
+`fetch`, and `goToPortal`.
+
+### Next.js apps (`@auditauth/next`)
+
+The Next.js package provides route handlers, middleware integration, server
+helpers, and protected request wrappers.
+
+```ts
+import { createAuditAuthNext } from '@auditauth/next'
+
+export const auditauth = createAuditAuthNext({
+  apiKey: process.env.AUDITAUTH_API_KEY!,
+  appId: process.env.AUDITAUTH_APP_ID!,
+  baseUrl: 'http://localhost:3000',
+  redirectUrl: 'http://localhost:3000/private',
+})
+```
+
+Then wire the API handlers:
+
+```ts
+// app/api/auditauth/[...auditauth]/route.ts
+export const { GET, POST } = auditauth.handlers
+```
+
+## Core runtime behavior
+
+Every integration is built around the same lifecycle.
+
+1. Redirect the user to AuditAuth login.
+2. Handle callback code and exchange it for tokens.
+3. Store session and tokens in runtime-appropriate storage.
+4. Automatically refresh tokens when API calls return `401`.
+5. Revoke and clear session data on logout.
+6. Emit request and navigation metrics.
+
+## API highlights
+
+These are the most common methods you will use.
+
+- `login()`: starts the login redirect flow
+- `logout()`: revokes and clears session state
+- `goToPortal()`: redirects to the AuditAuth portal
+- `fetch(url, init)`: performs authenticated requests with auto-refresh
+- `getSession()` or `getSessionUser()`: returns current user data
+- `withAuthRequest(handler)`: protects server routes (Next.js)
+
+## Run the examples
+
+The repository includes runnable examples that mirror production integration
+patterns.
 
 ```bash
 npm install
+
+# browser app example
+npm run dev:example-vanilla
+
+# react example
+npm run dev:example-react
+
+# next.js app example
+npm run dev:example-next
 ```
 
-Build all packages:
+Read the example-specific docs for setup details:
+
+- `examples/vanilla/README.md`
+- `examples/react/README.md`
+- `examples/next/README.md`
+
+## Package docs
+
+For package-level API details, read:
+
+- `packages/web/README.md`
+- `packages/next/README.md`
+
+## Development
+
+If you are contributing to this repository, use workspace scripts from the root
+package.
 
 ```bash
+npm install
 npm run build
 ```
 
-Run individual packages:
+You can also run individual package watchers:
 
 ```bash
 npm run dev:core
@@ -112,36 +218,10 @@ npm run dev:node
 npm run dev:next
 ```
 
-Run examples:
-
-```bash
-npm run dev:example-vanilla
-npm run dev:example-react
-```
-
----
-
 ## Status
 
-The SDK ecosystem is currently under active development toward the `1.0.0` release.
-
-Interfaces may evolve as the infrastructure stabilizes.
-
----
-
-## Philosophy
-
-AuditAuth is built with a strict separation of concerns:
-
-- Identity protocol logic lives in `core`
-- Environment-specific adapters remain thin
-- Session state is explicit
-- Refresh flow is deterministic
-- Observability is first-class
-
-The objective is predictable identity infrastructure — not opaque authentication helpers.
-
----
+This SDK is under active development toward `1.0.0`. Minor API and behavior
+changes can still happen while integration patterns stabilize.
 
 ## License
 
