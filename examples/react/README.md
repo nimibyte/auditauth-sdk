@@ -1,43 +1,45 @@
 # React example (`example-react`)
 
-This example shows how to integrate `@auditauth/react` in a Vite and
-React Router app. It demonstrates provider setup, route-level auth guard,
-session actions, and authenticated API requests.
+Vite + React Router integration example for `@auditauth/react`.
+
+## Requirements
+
+- Run commands from `sdk/`
+- Node.js 18+
+- npm 9+
 
 ## Run the example
-
-From the repository root, run the React workspace.
 
 ```bash
 npm install
 npm run dev:example-react
 ```
 
-The app starts on `http://localhost:5173`.
+App URL: `http://localhost:5173`
 
-## What this example demonstrates
+## What this example covers
 
-This example maps each integration step to a simple file structure.
+- Provider setup with `AuditAuthProvider` in `src/App.tsx`
+- Route change tracking in `NavigationTracker` (`src/App.tsx`)
+- Public route rendering in `src/pages/public.tsx`
+- Private route protection with `RequireAuth` in `src/pages/private.tsx`
+- Session actions (`logout()`, `goToPortal()`) in `src/pages/private.tsx`
+- Authenticated HTTP calls with `useAuditAuth().fetch()`
 
-- Provider setup in `src/App.tsx`
-- Router-level navigation metrics in `NavigationTracker`
-- Public page in `src/pages/public.tsx`
-- Protected page with `RequireAuth` in `src/pages/private.tsx`
-- Session actions with `logout()` and `goToPortal()`
-- Authenticated API calls using `useAuditAuth().fetch()`
+## Integration flow
 
-## Main integration flow
+1. Wrap the app with `AuditAuthProvider` and SDK config.
+2. Mount router and call `trackNavigationPath()` on route changes.
+3. Gate private content with `RequireAuth`.
+4. Read session user via `useAuditAuth().user`.
+5. Use `useAuditAuth().fetch()` for authenticated requests.
 
-The React example uses the same SDK lifecycle you would use in production.
+## Local testing notes
 
-1. Wrap your app with `AuditAuthProvider` and pass the SDK config.
-2. Use `RequireAuth` for private routes.
-3. Read user info from `useAuditAuth().user`.
-4. Use `useAuditAuth().fetch()` for authenticated HTTP calls.
-5. Track route changes with `trackNavigationPath()`.
+- The private page includes an API test button that calls
+  `https://jsonplaceholder.typicode.com/posts/1` via SDK `fetch()`.
 
-## Important note
+## Credentials note
 
-This example currently contains hardcoded sample credentials for local
-development only. Replace them with environment variables before using the
-pattern in a real project.
+This example uses hardcoded sample credentials in `src/App.tsx` for local
+testing. Replace them with environment-driven values before production use.

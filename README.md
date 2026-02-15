@@ -8,27 +8,27 @@
   Identity and session infrastructure for modern applications.
 </p>
 
-## What this SDK gives you
+## Overview
 
-AuditAuth SDK helps you implement authentication flows with a consistent API
-across browser and server runtimes. You get login, callback handling, token
-refresh, session state, logout, and request and navigation metrics.
+AuditAuth SDK gives you a consistent authentication and session API across
+browser and server runtimes. It covers login redirect flows, callback handling,
+token refresh, session persistence, logout, and request/navigation telemetry.
 
-The SDK is modular. You can pick only what you need:
+Use the package that matches your runtime:
 
 - `@auditauth/web` for framework-agnostic browser apps
 - `@auditauth/react` for React apps
 - `@auditauth/next` for Next.js App Router apps
 - `@auditauth/node` for token verification in Node runtimes
 
-## Monorepo structure
+## Repository layout
 
 This repository is an npm workspace monorepo with SDK packages and runnable
 examples.
 
 ```text
 packages/
-  core   Shared protocol logic and shared types
+  core   Shared protocol logic and types
   web    Browser SDK
   react  React provider and auth guard
   node   JWT verification helpers
@@ -40,9 +40,14 @@ examples/
   next     Next.js SDK example
 ```
 
+## Requirements
+
+- Node.js 18+
+- npm 9+
+
 ## Install
 
-Install the package for your runtime.
+Install the package for your runtime:
 
 ```bash
 npm install @auditauth/web
@@ -50,12 +55,13 @@ npm install @auditauth/web
 npm install @auditauth/react
 # or
 npm install @auditauth/next
+# or
+npm install @auditauth/node
 ```
 
 ## Shared config
 
-All integrations use the same base config shape, so it is easy to move between
-frameworks.
+All integrations use the same base config shape:
 
 ```ts
 type AuditAuthConfig = {
@@ -68,17 +74,12 @@ type AuditAuthConfig = {
 
 - `apiKey`: AuditAuth API key for your application
 - `appId`: AuditAuth application identifier
-- `baseUrl`: your app origin, for example `http://localhost:5173`
-- `redirectUrl`: post-login page in your app
+- `baseUrl`: app origin (for example `http://localhost:5173`)
+- `redirectUrl`: post-login route in your app
 
 ## Quick start by framework
 
-Use one of these integration patterns as your starting point.
-
 ### Browser apps (`@auditauth/web`)
-
-The Web SDK is the lowest-level browser integration. You create an instance,
-wire a storage adapter, handle redirects, and call helper methods.
 
 ```ts
 import { AuditAuthWeb } from '@auditauth/web'
@@ -102,8 +103,6 @@ await auditauth.handleRedirect()
 
 ### React apps (`@auditauth/react`)
 
-The React package wraps `@auditauth/web` in a provider and hooks API.
-
 ```tsx
 import { AuditAuthProvider } from '@auditauth/react'
 
@@ -120,12 +119,9 @@ import { AuditAuthProvider } from '@auditauth/react'
 ```
 
 Use `useAuditAuth()` in child components to access `user`, `login`, `logout`,
-`fetch`, and `goToPortal`.
+`fetch`, `goToPortal`, and navigation tracking helpers.
 
 ### Next.js apps (`@auditauth/next`)
-
-The Next.js package provides route handlers, middleware integration, server
-helpers, and protected request wrappers.
 
 ```ts
 import { createAuditAuthNext } from '@auditauth/next'
@@ -138,54 +134,49 @@ export const auditauth = createAuditAuthNext({
 })
 ```
 
-Then wire the API handlers:
+Wire API route handlers:
 
 ```ts
 // app/api/auditauth/[...auditauth]/route.ts
 export const { GET, POST } = auditauth.handlers
 ```
 
-## Core runtime behavior
+## Runtime lifecycle
 
-Every integration is built around the same lifecycle.
-
-1. Redirect the user to AuditAuth login.
-2. Handle callback code and exchange it for tokens.
-3. Store session and tokens in runtime-appropriate storage.
-4. Automatically refresh tokens when API calls return `401`.
-5. Revoke and clear session data on logout.
+1. Redirect user to AuditAuth login.
+2. Handle callback code and exchange for tokens.
+3. Persist session/tokens using runtime-appropriate storage.
+4. Retry authenticated requests after token refresh on `401`.
+5. Revoke and clear session state on logout.
 6. Emit request and navigation metrics.
 
 ## API highlights
 
-These are the most common methods you will use.
-
-- `login()`: starts the login redirect flow
+- `login()`: starts login redirect flow
 - `logout()`: revokes and clears session state
-- `goToPortal()`: redirects to the AuditAuth portal
-- `fetch(url, init)`: performs authenticated requests with auto-refresh
-- `getSession()` or `getSessionUser()`: returns current user data
+- `goToPortal()`: redirects to AuditAuth portal
+- `fetch(url, init)`: authenticated requests with automatic refresh handling
+- `getSession()` or `getSessionUser()`: current user/session state
 - `withAuthRequest(handler)`: protects server routes (Next.js)
 
-## Run the examples
+## Run examples
 
-The repository includes runnable examples that mirror production integration
-patterns.
+From the SDK root:
 
 ```bash
 npm install
 
-# browser app example
+# framework-agnostic browser example
 npm run dev:example-vanilla
 
 # react example
 npm run dev:example-react
 
-# next.js app example
+# next.js example
 npm run dev:example-next
 ```
 
-Read the example-specific docs for setup details:
+Example docs:
 
 - `examples/vanilla/README.md`
 - `examples/react/README.md`
@@ -193,22 +184,21 @@ Read the example-specific docs for setup details:
 
 ## Package docs
 
-For package-level API details, read:
-
 - `packages/web/README.md`
+- `packages/react/README.md`
 - `packages/next/README.md`
+- `packages/node/README.md`
 
 ## Development
 
-If you are contributing to this repository, use workspace scripts from the root
-package.
+Use workspace scripts from the SDK root:
 
 ```bash
 npm install
 npm run build
 ```
 
-You can also run individual package watchers:
+Individual package dev scripts:
 
 ```bash
 npm run dev:core

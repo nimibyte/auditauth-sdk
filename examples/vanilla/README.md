@@ -1,43 +1,47 @@
 # Vanilla example (`example-vanilla`)
 
-This example shows how to integrate `@auditauth/web` in a framework-agnostic
-browser app using plain JavaScript and Vite.
+Framework-agnostic integration example for `@auditauth/web` using plain
+JavaScript and Vite.
+
+## Requirements
+
+- Run commands from `sdk/`
+- Node.js 18+
+- npm 9+
 
 ## Run the example
-
-From the repository root, run the vanilla workspace.
 
 ```bash
 npm install
 npm run dev:example-vanilla
 ```
 
-The app starts on `http://localhost:5173`.
+App URL: `http://localhost:5173`
 
-## What this example demonstrates
+## What this example covers
 
-This example keeps everything explicit so you can see the raw SDK lifecycle.
+- SDK instance creation and storage adapter in `src/auth.js`
+- Redirect callback handling in `src/router.js`
+- Navigation tracking with `initNavigationTracking()` in `src/router.js`
+- Client-side route protection and login redirects in `src/router.js`
+- Session-driven private UI in `src/pages/private.js`
+- Authenticated requests with `auditauth.fetch()` in `src/pages/private.js`
 
-- SDK instance and local storage adapter in `src/auth.js`
-- Redirect handling and route rendering in `src/router.js`
-- Public page in `src/pages/public.js`
-- Private page in `src/pages/private.js`
-- Session actions with `login()`, `logout()`, and `goToPortal()`
-- Authenticated requests and refresh behavior with `auditauth.fetch()`
-
-## Main integration flow
-
-The app runs through the same sequence used in larger frameworks.
+## Integration flow
 
 1. Create `AuditAuthWeb` with config and storage adapter.
-2. Call `handleRedirect()` on startup.
+2. Call `handleRedirect()` during bootstrap.
 3. Enable `initNavigationTracking()`.
-4. Gate private routes with `isAuthenticated()`.
-5. Start login with `login()` when no session exists.
-6. Read the current user from `getSessionUser()`.
+4. Protect private routes with `isAuthenticated()`.
+5. Trigger `login()` when private route access has no session.
+6. Read user data with `getSessionUser()`.
 
-## Important note
+## Local testing notes
 
-This example currently contains hardcoded sample credentials for local
-development only. Replace them with environment variables before using the
-pattern in a real project.
+- `Test Public API` calls `https://jsonplaceholder.typicode.com/posts/1`.
+- `Force 401 (Refresh Flow)` calls `http://localhost:4000/v1/auth/testing`.
+
+## Credentials note
+
+This example uses hardcoded sample credentials in `src/auth.js` for local
+testing. Replace them with environment-driven values before production use.

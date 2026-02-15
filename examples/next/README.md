@@ -1,46 +1,52 @@
 # Next.js example (`example-next`)
 
-This example shows a complete App Router integration with `@auditauth/next`.
-It includes SDK route handlers, middleware protection, server-side session
-access, authenticated server requests, and protected API route handlers.
+Next.js App Router integration example for `@auditauth/next`.
+
+## Requirements
+
+- Run commands from `sdk/`
+- Node.js 18+
+- npm 9+
 
 ## Run the example
-
-From the repository root, run the Next.js example workspace.
 
 ```bash
 npm install
 npm run dev:example-next
 ```
 
-The app starts on `http://localhost:5173`.
+App URL: `http://localhost:5173`
 
-## What this example demonstrates
+## What this example covers
 
-This example maps each integration concern to one file so you can copy patterns
-into your own app.
-
-- SDK provider setup in `src/providers/auth.ts`
-- Auth API handlers in `src/app/api/auditauth/[...auditauth]/route.ts`
-- Middleware protection in `src/proxy.ts`
-- Session read in `src/app/private/page.tsx`
-- Protected API route with token verification in
+- SDK instance setup in `src/providers/auth.ts`
+- Auth callback/login handlers in `src/app/api/auditauth/[...auditauth]/route.ts`
+- Route protection through SDK middleware in `src/proxy.ts`
+- Server-side session read with `auditauth.getSession()` in
+  `src/app/private/page.tsx`
+- Protected API route wrapper with `auditauth.withAuthRequest()` in
   `src/app/api/test/protected/route.ts`
-- Server-side authenticated request in `src/app/private/actions.ts`
+- Authenticated server request with `auditauth.fetch()` in
+  `src/app/private/actions.ts`
 
-## Main integration flow
+## Integration flow
 
-The example follows the standard flow used by `@auditauth/next`.
+1. Create a single `auditauth` instance using `createAuditAuthNext()`.
+2. Export `GET`/`POST` from `auditauth.handlers` for auth routes.
+3. Protect private routes through `auditauth.middleware()`.
+4. Read user session in server components with `auditauth.getSession()`.
+5. Use `auditauth.fetch()` for authenticated server-side calls.
+6. Wrap protected API handlers with `auditauth.withAuthRequest()`.
 
-1. Create one `auditauth` instance with `createAuditAuthNext()`.
-2. Export `GET` and `POST` handlers from `auditauth.handlers`.
-3. Route private pages through `auditauth.middleware()`.
-4. Read user session with `auditauth.getSession()` in server components.
-5. Use `auditauth.fetch()` for server-to-server protected API calls.
-6. Wrap sensitive route handlers with `auditauth.withAuthRequest()`.
+## Local testing notes
 
-## Important note
+- `Normal fetch` in the private page calls `/api/test/protected` with native
+  `fetch`.
+- `Auth fetch` calls the same endpoint through server action logic that uses
+  `auditauth.fetch()`.
 
-This example currently contains hardcoded sample credentials for local
-development only. Replace them with environment variables before using the
-pattern in a real project.
+## Credentials note
+
+This example uses hardcoded sample credentials in `src/providers/auth.ts` for
+local testing. Replace them with environment-driven values before production
+use.
