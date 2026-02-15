@@ -2,8 +2,8 @@
 
 import { cookies } from "next/headers";
 import { SETTINGS } from "./settings";
-import { RequestMethod } from "./types";
 import { headers } from 'next/headers';
+import { refreshTokens, RequestMethod } from "@auditauth/core";
 
 const getRequestOrigin = async (): Promise<string> => {
   const h = await headers();
@@ -26,9 +26,9 @@ const getRequestOrigin = async (): Promise<string> => {
 const auditauthFetch = async (url: string, init: RequestInit = {}) => {
   const cookieManager = await cookies();
   const origin = await getRequestOrigin();
-  const access_token = cookieManager.get(SETTINGS.cookies.access.name)?.value;
-  const refresh_token = cookieManager.get(SETTINGS.cookies.refresh.name)?.value;
-  const session_id = cookieManager.get(SETTINGS.cookies.session_id.name)?.value;
+  const access_token = cookieManager.get(SETTINGS.storage_keys.access)?.value;
+  const refresh_token = cookieManager.get(SETTINGS.storage_keys.refresh)?.value;
+  const session_id = cookieManager.get(SETTINGS.storage_keys.session_id)?.value;
 
   const doFetch = (token?: string) =>
     fetch(url, {
@@ -44,21 +44,14 @@ const auditauthFetch = async (url: string, init: RequestInit = {}) => {
   let response = await doFetch(access_token);
 
   if (response.status === 401 && refresh_token) {
-    const refreshResponse = await fetch(`${SETTINGS.domains.api}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        refresh_token,
-        client_type: 'server',
-      }),
-    });
+    const refreshData = await refreshTokens({ refresh_token, client_type: 'server' });
 
-    if (!refreshResponse.ok) return response;
+    if (!refreshData) {
+      return response;
+    }
 
-    const data = await refreshResponse.json();
-
-    if (data?.access_token && data?.refresh_token) {
-      response = await doFetch(data.access_token);
+    if (refreshData.access_token && refreshData.refresh_token) {
+      response = await doFetch(refreshData.access_token);
     }
   }
 

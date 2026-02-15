@@ -1,26 +1,22 @@
 'use server'
 import { NextRequest, NextResponse } from "next/server";
-import { importSPKI, jwtVerify } from 'jose';
+import { CookieAdapter, Session } from "./types";
+import { SETTINGS } from "./settings";
 import {
   AuditAuthConfig,
-  CookieAdapter,
-  CredentialResponse,
-  Metric,
+  CredentialsResponse,
+  buildAuthUrl,
+  authorizeCode,
+  revokeSession,
+  buildPortalUrl,
+  refreshTokens,
+  sendMetrics,
+  SessionUser,
   RequestMethod,
-  Session,
-  SessionUser
-} from "./types";
-import { SETTINGS } from "./settings";
-
-/* -------------------------------------------------------------------------- */
-/*                                    KEYS                                    */
-/* -------------------------------------------------------------------------- */
-
-let cachedKey: CryptoKey | null = null;
-
-/* -------------------------------------------------------------------------- */
-/*                               MAIN CLASS                                   */
-/* -------------------------------------------------------------------------- */
+  Metric,
+} from '@auditauth/core';
+import { AuditAuthTokenPayload, verifyRequest } from "@auditauth/node";
+import { ok } from "assert";
 
 class AuditAuthNext {
   private config: AuditAuthConfig;
@@ -40,39 +36,18 @@ class AuditAuthNext {
     this.cookies = cookies;
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                             AUTH PRIMITIVES                              */
-  /* ------------------------------------------------------------------------ */
-
-  async verifyAccessToken(token: string): Promise<boolean> {
-    try {
-      cachedKey =
-        cachedKey ||
-        await importSPKI(SETTINGS.jwt_public_key, 'RS256') as CryptoKey;
-
-      await jwtVerify(token, cachedKey, {
-        issuer: SETTINGS.jwt_issuer,
-        audience: this.config.appId,
-      });
-
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   private getCookieTokens() {
     return {
-      access: this.cookies.get(SETTINGS.cookies.access.name),
-      refresh: this.cookies.get(SETTINGS.cookies.refresh.name),
+      access: this.cookies.get(SETTINGS.storage_keys.access),
+      refresh: this.cookies.get(SETTINGS.storage_keys.refresh),
     };
   }
 
-  private setCookieTokens(params: CredentialResponse) {
+  private setCookieTokens(params: CredentialsResponse) {
     const isSecure = this.config.redirectUrl.includes('https');
 
     this.cookies.set(
-      SETTINGS.cookies.access.name,
+      SETTINGS.storage_keys.access,
       params.access_token,
       {
         httpOnly: true,
@@ -84,7 +59,7 @@ class AuditAuthNext {
     );
 
     this.cookies.set(
-      SETTINGS.cookies.refresh.name,
+      SETTINGS.storage_keys.refresh,
       params.refresh_token,
       {
         httpOnly: true,
@@ -96,168 +71,122 @@ class AuditAuthNext {
     );
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                              SESSION HELPERS                             */
-  /* ------------------------------------------------------------------------ */
+  private pushMetric(payload: Omit<Metric, 'session_id'>) {
+    const session_id = this.cookies.get(SETTINGS.storage_keys.session_id);
+    queueMicrotask(() => {
+      fetch(`${this.config.baseUrl}${SETTINGS.bff.paths.metrics}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, session_id }),
+      }).catch(() => { });
+    });
+  }
 
   getSession(): SessionUser | null {
     return JSON.parse(
-      this.cookies.get(SETTINGS.cookies.session.name) || '{}'
+      this.cookies.get(SETTINGS.storage_keys.session) || '{}'
     )?.user || null;
   }
 
   hasSession(): boolean {
-    return !!this.cookies.get(SETTINGS.cookies.session.name);
+    return !!this.cookies.get(SETTINGS.storage_keys.session);
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                              AUTH FLOWS                                  */
-  /* ------------------------------------------------------------------------ */
-
-  private async buildAuthUrl(): Promise<URL> {
-    const response = await fetch(`${SETTINGS.domains.api}/applications/login`, {
-      method: 'POST',
-      headers: { 'x-api-key': this.config.apiKey },
-    });
-
-    if (!response.ok) {
-      throw new Error('invalid_app');
-    }
-
-    const { code, redirectUrl } = await response.json();
-    const url = new URL(redirectUrl);
-    url.searchParams.set('code', code);
-
+  getLoginUrl(): URL {
+    const url = new URL(SETTINGS.bff.paths.login, this.config.baseUrl);
     return url;
   }
 
-  async callback(request: NextRequest) {
+  getLogoutUrl(): URL {
+    const url = new URL(SETTINGS.bff.paths.logout, this.config.baseUrl);
+    return url;
+  }
+
+  getPortalUrl(): URL {
+    const url = new URL(SETTINGS.bff.paths.portal, this.config.baseUrl);
+    return url;
+  }
+
+  private async callback(request: NextRequest) {
     const code = new URL(request.url).searchParams.get('code');
 
-    if (!code) {
+    try {
+      const { data } = await authorizeCode({ code, client_type: 'server' });
+
+      const session: Session = {
+        user: data.user,
+      };
+
+      const isSecure = this.config.redirectUrl.includes('http');
+
+      this.cookies.set(
+        SETTINGS.storage_keys.session,
+        JSON.stringify(session),
+        {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: isSecure,
+          path: '/',
+          maxAge: data.refresh_expires_seconds - 60,
+        },
+      );
+
+      this.setCookieTokens({
+        access_token: data.access_token,
+        access_expires_seconds: data.access_expires_seconds,
+        refresh_token: data.refresh_token!,
+        refresh_expires_seconds: data.refresh_expires_seconds,
+      });
+
+      return { ok: true, url: this.config.redirectUrl };
+    } catch {
       return {
         ok: false,
         url: `${SETTINGS.domains.client}/auth/invalid?reason=wrong_config`,
       };
     }
-
-    const response = await fetch(`${SETTINGS.domains.api}/auth/authorize`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, client_type: 'server' }),
-    });
-
-    if (!response.ok) {
-      return {
-        ok: false,
-        url: `${SETTINGS.domains.client}/auth/invalid?reason=unauthorized`,
-      };
-    }
-
-    const result = await response.json();
-
-    const session: Session = {
-      user: {
-        _id: result.user._id.toString(),
-        email: result.user.email,
-        avatar: result.user.avatar,
-        name: result.user.name,
-      },
-    };
-
-    const isSecure = this.config.redirectUrl.includes('http');
-
-    this.cookies.set(
-      SETTINGS.cookies.session.name,
-      JSON.stringify(session),
-      {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: isSecure,
-        path: '/',
-        maxAge: result.refresh_expires_seconds - 60,
-      },
-    );
-
-    this.setCookieTokens({
-      access_token: result.access_token,
-      access_expires_seconds: result.access_expires_seconds,
-      refresh_token: result.refresh_token,
-      refresh_expires_seconds: result.refresh_expires_seconds,
-    });
-
-    return { ok: true, url: this.config.redirectUrl };
   }
 
-  async logout() {
+  private async logout() {
     const { access } = this.getCookieTokens();
-    if (access) {
-      await fetch(`${SETTINGS.domains.api}/auth/revoke`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${access}` },
-      }).catch(() => { });
-    }
 
-    this.cookies.remove(SETTINGS.cookies.access.name);
-    this.cookies.remove(SETTINGS.cookies.refresh.name);
-    this.cookies.remove(SETTINGS.cookies.session.name);
+    this.cookies.remove(SETTINGS.storage_keys.access);
+    this.cookies.remove(SETTINGS.storage_keys.refresh);
+    this.cookies.remove(SETTINGS.storage_keys.session);
+
+    if (!access) return;
+
+    await revokeSession({ access_token: access }).catch(() => { });
   }
 
-  async getPortalUrl() {
-    const { access } = this.getCookieTokens();
-    const res = await fetch(`${SETTINGS.domains.api}/portal/exchange`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${access}`,
-      },
-    });
+  withAuthRequest<C>(
+    handler: (
+      req: NextRequest,
+      ctx: C,
+      session: AuditAuthTokenPayload,
+    ) => Promise<Response>
+  ) {
+    return async (req: NextRequest, ctx: C) => {
+      try {
+        const session = await verifyRequest({
+          request: req,
+          appId: this.config.appId,
+        });
 
-    if (!res.ok && res.status === 401) {
-      return { ok: false, url: null, reason: 'unathorized' };
-    } else if (!res.ok) {
-      return { ok: false, url: null, reason: 'fail' };
-    }
-
-    const body = await res.json();
-
-    return {
-      ok: true,
-      url: `${body.redirectUrl}?code=${body.code}&redirectUrl=${this.config.redirectUrl}`,
-      reason: null,
+        return handler(req, ctx, session);
+      } catch (err) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     };
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                              REFRESH FLOW                                 */
-  /* ------------------------------------------------------------------------ */
-
-  private async refreshRequest(refreshToken: string): Promise<CredentialResponse | null> {
-    try {
-      const response = await fetch(`${SETTINGS.domains.api}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refresh_token: refreshToken,
-          client_type: 'server',
-        }),
-      });
-
-      if (!response.ok) return null;
-      return response.json();
-    } catch {
-      return null;
-    }
-  }
-
-  /* ------------------------------------------------------------------------ */
-  /*                         REQUEST WITH AUTO-REFRESH                         */
-  /* ------------------------------------------------------------------------ */
-
-  async request(url: string, init: RequestInit = {}) {
+  async fetch(url: string, init: RequestInit = {}) {
     const { access, refresh } = this.getCookieTokens();
 
+    const finalUrl = url.startsWith('http') ? url : `${this.config.baseUrl}${url}`;
+
     const doFetch = (token?: string) =>
-      fetch(url, {
+      fetch(finalUrl, {
         ...init,
         headers: {
           ...init.headers,
@@ -269,9 +198,14 @@ class AuditAuthNext {
     let res = await doFetch(access);
 
     if (res.status === 401 && refresh) {
-      const data = await this.refreshRequest(refresh);
-      if (data?.access_token && data?.refresh_token) {
-        res = await doFetch(data.access_token);
+      const refreshData = await refreshTokens({ refresh_token: refresh, client_type: 'server' });
+
+      if (!refreshData) {
+        return res;
+      }
+
+      if (refreshData.access_token && refreshData.refresh_token) {
+        res = await doFetch(refreshData.access_token);
       }
     }
 
@@ -290,64 +224,35 @@ class AuditAuthNext {
     return res;
   }
 
-  /* ------------------------------------------------------------------------ */
-  /*                                METRICS                                    */
-  /* ------------------------------------------------------------------------ */
-
-  async metrics(payload: Metric) {
-    await fetch(`${SETTINGS.domains.api}/metrics`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-auditauth-app': this.config.appId,
-        'x-auditauth-key': this.config.apiKey,
-      },
-      body: JSON.stringify({ ...payload }),
-    });
-
-    return new Response(null, { status: 204 });
-  }
-
-  private pushMetric(payload: Metric) {
-    const session_id = this.cookies.get(SETTINGS.cookies.session_id.name);
-    queueMicrotask(() => {
-      fetch(`${this.config.baseUrl}${SETTINGS.bff.paths.metrics}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, session_id }),
-      }).catch(() => { });
-    });
-  }
-  /* ------------------------------------------------------------------------ */
-  /*                                METRICS                                    */
-  /* ------------------------------------------------------------------------ */
-
-  async refresh() {
+  private async refresh() {
     const { refresh } = this.getCookieTokens();
 
     if (!refresh) return { ok: false };
 
-    const result = await this.refreshRequest(refresh);
+    const result = await refreshTokens({ refresh_token: refresh, client_type: 'server' });
 
     if (!result) return { ok: false };
 
-    this.setCookieTokens(result);
+    const { access_token, refresh_token, access_expires_seconds, refresh_expires_seconds } = result;
+
+    this.setCookieTokens({
+      access_token,
+      access_expires_seconds,
+      refresh_token,
+      refresh_expires_seconds,
+    });
 
     return { ok: true };
   }
-
-  /* ------------------------------------------------------------------------ */
-  /*                               MIDDLEWARE                                  */
-  /* ------------------------------------------------------------------------ */
 
   async middleware(request: NextRequest) {
     const { access, refresh } = this.getCookieTokens();
     const url = request.nextUrl;
 
     if (access && refresh) {
-      const sid = this.cookies.get(SETTINGS.cookies.session_id.name);
+      const sid = this.cookies.get(SETTINGS.storage_keys.session_id);
       if (!sid) {
-        this.cookies.set(SETTINGS.cookies.session_id.name, crypto.randomUUID(), {
+        this.cookies.set(SETTINGS.storage_keys.session_id, crypto.randomUUID(), {
           httpOnly: true,
           sameSite: 'lax',
           secure: this.config.baseUrl.startsWith('https'),
@@ -368,16 +273,19 @@ class AuditAuthNext {
       return NextResponse.next();
     }
 
-    if (!refresh) return NextResponse.redirect(new URL(SETTINGS.bff.paths.login, request.url));
+    if (!refresh) {
+      if (request.method !== 'GET') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL(SETTINGS.bff.paths.login, request.url));
+    }
 
-    if (refresh && !access) return NextResponse.redirect(new URL(`${SETTINGS.bff.paths.refresh}?redirectUrl=${url}`, request.url));
+    if (refresh && !access) {
+      return NextResponse.redirect(new URL(`${SETTINGS.bff.paths.refresh}?redirectUrl=${url}`, request.url));
+    }
 
     return NextResponse.next();
   }
-
-  /* ------------------------------------------------------------------------ */
-  /*                               BFF HANDLERS                               */
-  /* ------------------------------------------------------------------------ */
 
   getHandlers() {
     return {
@@ -387,51 +295,84 @@ class AuditAuthNext {
 
         switch (action) {
           case 'login': {
-            const url = await this.buildAuthUrl();
+            const url = await buildAuthUrl({ apiKey: this.config.apiKey, redirectUrl: `${this.config.baseUrl}/api/auditauth/callback` });
             return NextResponse.redirect(url);
           };
+
           case 'refresh': {
             const { ok } = await this.refresh();
             if (ok) return NextResponse.redirect(redirectUrl || this.config.redirectUrl);
 
-            const url = await this.buildAuthUrl();
+            const url = await buildAuthUrl({ apiKey: this.config.apiKey, redirectUrl: `${this.config.baseUrl}/api/auditauth/callback` });
             return NextResponse.redirect(url);
           };
+
           case 'callback': {
             const { url } = await this.callback(req);
             return NextResponse.redirect(url);
           };
+
           case 'logout': {
             await this.logout();
             return NextResponse.redirect(this.config.redirectUrl);
           };
+
           case 'portal': {
-            const { ok, url } = await this.getPortalUrl();
-            return ok && url
-              ? NextResponse.redirect(url)
-              : NextResponse.redirect(`${SETTINGS.domains.client}/auth/invalid`);
+            const { access } = this.getCookieTokens();
+
+            try {
+              if (!access) throw new Error('Not auth token');
+
+              const url = await buildPortalUrl({ access_token: access, redirectUrl: this.config.redirectUrl });
+
+              return NextResponse.redirect(url);
+            } catch (err: any) {
+              return NextResponse.redirect(`${SETTINGS.domains.client}/auth/invalid`);
+
+            }
           };
+
           case 'session': {
             const user = this.getSession();
             if (!user) return new NextResponse(null, { status: 401 });
             return NextResponse.json({ user });
           };
+
           default: {
             return new Response('not found', { status: 404 });
           };
         }
       },
 
-      POST: async (req: Request, ctx: { params: Promise<{ auditauth: string[] }> }) => {
+      POST: async (req: NextRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => {
         const action = (await ctx.params).auditauth[0];
-        if (action === 'metrics') {
-          return this.metrics(await req.json());
-        }
-        return new Response('not found', { status: 404 });
+
+        switch (action) {
+          case 'metrics': {
+            const payload = await req.json();
+            await sendMetrics({
+              payload,
+              appId: this.config.appId,
+              apiKey: this.config.apiKey,
+            })
+            return new Response(null, { status: 204 });
+          };
+
+          case 'refresh': {
+            const redirectUrl = req.nextUrl.searchParams.get('redirectUrl');
+            const { ok } = await this.refresh();
+            if (ok) return NextResponse.redirect(redirectUrl || this.config.redirectUrl);
+
+            return new Response('Session expired', { status: 401 });
+          };
+
+          default: {
+            return new Response('not found', { status: 404 });
+          };
+        };
       },
     };
   }
-
 }
 
 export { AuditAuthNext };

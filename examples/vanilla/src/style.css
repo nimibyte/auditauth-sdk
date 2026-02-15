@@ -1,0 +1,156 @@
+:root {
+  --bg: #0a0f14;
+  --panel: #111827;
+  --border: #1f2937;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --primary: #14b8a6;
+  --danger: #ef4444;
+
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ---------- HEADER ---------- */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 15, 20, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: var(--primary);
+  color: #0a0f14;
+  font-weight: 600;
+}
+
+.powered {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.powered a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.powered a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- MAIN ---------- */
+
+.main {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 0 24px;
+}
+
+.section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.section h3 {
+  margin-top: 0;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+
+/* ---------- BUTTONS ---------- */
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  font-size: 14px;
+  background: #0f172a;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+button.primary {
+  background: var(--primary);
+  color: #0a0f14;
+  border: none;
+}
+
+button.danger {
+  background: var(--danger);
+  color: white;
+  border: none;
+}
+
+/* ---------- LINKS ---------- */
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.user-avatar {
+  width: 100px;
+  border-radius: 10px;
+  margin-top: 12px;
+}

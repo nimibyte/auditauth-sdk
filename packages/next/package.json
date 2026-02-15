@@ -1,13 +1,15 @@
 {
   "name": "@auditauth/next",
-  "version": "0.1.9",
-  "description": "Official AuditAuth SDK for Next.js",
+  "version": "0.2.0",
+  "description": "AuditAuth NextJS SDK",
   "license": "MIT",
   "author": "Nimibyte",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "exports": {
     ".": {
@@ -17,7 +19,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "dev": "tsc -p tsconfig.build.json --watch"
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "clean": "rm -rf dist"
   },
   "peerDependencies": {
     "next": ">=13",
@@ -25,10 +28,12 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "jose": "^5.2.0"
+    "@auditauth/core": "^0.1.0",
+    "@auditauth/node": "^0.1.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.9",
+    "typescript": "^5.9.0",
+    "@types/node": "^20",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3"
   }

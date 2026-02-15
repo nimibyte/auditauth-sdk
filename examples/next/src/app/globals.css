@@ -1,0 +1,155 @@
+:root {
+  --bg: #0a0f14;
+  --panel: #111827;
+  --border: #1f2937;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --primary: #14b8a6;
+  --danger: #ef4444;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* HEADER */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 15, 20, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.powered {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.powered a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+/* MAIN */
+
+.main {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 0 24px;
+}
+
+.section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+/* ---------------------------------- */
+/*               BUTTONS              */
+/* ---------------------------------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0.65rem 1.4rem;
+  border-radius: 10px;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  border: 1px solid transparent;
+}
+
+/* Primary (AuditAuth teal) */
+.button-primary {
+  background: #14b8a6;
+  color: #0a0f14;
+}
+
+.button-primary:hover {
+  background: #0ea594;
+}
+
+/* Danger */
+.button-danger {
+  background: #1a1f2b;
+  color: #ff6b6b;
+  border: 1px solid #2a3242;
+}
+
+.button-danger:hover {
+  background: #202737;
+  border-color: #ff6b6b;
+}
+
+/* Ghost */
+.button-ghost {
+  background: transparent;
+  color: #cfd6e4;
+  border: 1px solid #2a3242;
+}
+
+.button-ghost:hover {
+  background: #111827;
+}
+
+/* Small variant */
+.button-sm {
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+}
+
+button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0f172a;
+  color: var(--text);
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--primary);
+  border: none;
+  color: #0a0f14;
+}
+
+button.danger {
+  background: var(--danger);
+  border: none;
+}

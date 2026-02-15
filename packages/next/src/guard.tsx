@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { SessionUser } from "./types";
 import { SETTINGS } from "./settings";
+import { SessionUser } from "@auditauth/core";
 
 type AuthContextValue = {
   user: SessionUser;
