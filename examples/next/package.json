@@ -9,8 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@auditauth/next": "^0.2.0",
-    "@auditauth/node": "^0.1.0",
+    "@auditauth/next": "^0.2.0-beta.1",
+    "@auditauth/node": "^0.2.0-beta.1",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "build": "npm run build -ws",
+    "test": "vitest run",
 
     "build:core": "npm run build -w @auditauth/core",
     "dev:core": "AUDITAUTH_SDK_ENV=development npm run dev -w @auditauth/core",
@@ -36,6 +37,9 @@
     "preview:example-react": "npm run preview -w example-react"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "@testing-library/react": "^16.2.0",
+    "jsdom": "^26.1.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

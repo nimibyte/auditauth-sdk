@@ -1,9 +1,29 @@
 {
   "name": "@auditauth/react",
-  "version": "0.1.0",
+  "version": "0.2.0-beta.1",
   "description": "AuditAuth React SDK",
   "license": "MIT",
   "author": "Nimibyte",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nimibyte/auditauth-sdk.git"
+  },
+  "homepage": "https://docs.auditauth.com",
+  "bugs": {
+    "url": "https://github.com/nimibyte/auditauth-sdk/issues"
+  },
+  "keywords": [
+    "authentication",
+    "auth",
+    "oauth",
+    "identity",
+    "jwt",
+    "security",
+    "auditauth"
+  ],
   "module": "dist/index.js",
   "type": "module",
   "main": "dist/index.js",
@@ -29,7 +49,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@auditauth/web": "^0.1.0"
+    "@auditauth/web": "^0.2.0-beta.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

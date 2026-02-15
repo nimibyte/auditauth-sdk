@@ -1,9 +1,29 @@
 {
   "name": "@auditauth/node",
-  "version": "0.1.0",
+  "version": "0.2.0-beta.1",
   "description": "AuditAuth Node SDK - JWT verification",
   "license": "MIT",
   "author": "Nimibyte",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nimibyte/auditauth-sdk.git"
+  },
+  "homepage": "https://docs.auditauth.com",
+  "bugs": {
+    "url": "https://github.com/nimibyte/auditauth-sdk/issues"
+  },
+  "keywords": [
+    "authentication",
+    "auth",
+    "oauth",
+    "identity",
+    "jwt",
+    "security",
+    "auditauth"
+  ],
   "module": "dist/index.js",
   "type": "module",
   "main": "dist/index.js",
@@ -23,7 +43,7 @@
   },
   "dependencies": {
     "jose": "^5.2.0",
-    "@auditauth/core": "^0.1.0"
+    "@auditauth/core": "^0.2.0-beta.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

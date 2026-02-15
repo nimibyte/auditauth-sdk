@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build workspaces
+        run: npm run build
+
+      - name: Run tests (if present)
+        run: npm run test --if-present
+
+      - name: Pack core dry-run
+        working-directory: packages/core
+        run: npm pack --dry-run
+
+      - name: Pack web dry-run
+        working-directory: packages/web
+        run: npm pack --dry-run
+
+      - name: Pack react dry-run
+        working-directory: packages/react
+        run: npm pack --dry-run
+
+      - name: Pack node dry-run
+        working-directory: packages/node
+        run: npm pack --dry-run
+
+      - name: Pack next dry-run
+        working-directory: packages/next
+        run: npm pack --dry-run

@@ -151,6 +151,23 @@ Exports from `@auditauth/react`:
 - `useAuditAuth`
 - `RequireAuth`
 
+## Compatibility
+
+This package requires:
+
+- Node.js `>=18.18.0` for tooling and build environments
+- React `>=18`
+- React DOM `>=18`
+
+## Resources
+
+- Repository: https://github.com/nimibyte/auditauth-sdk
+- Documentation: https://docs.auditauth.com
+
 ## Example
 
 See `examples/react` for a complete Vite + React Router integration.
+
+## License
+
+MIT
