@@ -120,3 +120,16 @@ Verification throws an error when:
 
 Handle these errors in your framework and return `401 Unauthorized` for failed
 authentication.
+
+## Compatibility
+
+This package requires Node.js `>=18.18.0`.
+
+## Resources
+
+- Repository: https://github.com/nimibyte/auditauth-sdk
+- Documentation: https://docs.auditauth.com
+
+## License
+
+MIT

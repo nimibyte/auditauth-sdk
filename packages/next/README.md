@@ -111,6 +111,24 @@ For client-side navigation shortcuts, import these helpers:
 You can also use `AuditAuthGuard` and `useAuditAuth` to gate client-rendered
 UI sections.
 
+## Compatibility
+
+This package requires:
+
+- Node.js `>=18.18.0`
+- Next.js `>=13`
+- React `>=18`
+- React DOM `>=18`
+
+## Resources
+
+- Repository: https://github.com/nimibyte/auditauth-sdk
+- Documentation: https://docs.auditauth.com
+
 ## Example
 
 See `examples/next` for a complete App Router integration.
+
+## License
+
+MIT

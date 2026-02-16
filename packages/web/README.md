@@ -90,6 +90,19 @@ These methods are available in `AuditAuthWeb`.
 - `trackNavigationPath(path: string): void`
 - `initNavigationTracking(): void`
 
+## Compatibility
+
+This package requires Node.js `>=18.18.0` for tooling and build environments.
+
+## Resources
+
+- Repository: https://github.com/nimibyte/auditauth-sdk
+- Documentation: https://docs.auditauth.com
+
 ## Example
 
 See the complete integration in `examples/vanilla/src`.
+
+## License
+
+MIT

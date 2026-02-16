@@ -1,9 +1,29 @@
 {
   "name": "@auditauth/next",
-  "version": "0.2.0",
+  "version": "0.2.0-beta.1",
   "description": "AuditAuth NextJS SDK",
   "license": "MIT",
   "author": "Nimibyte",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nimibyte/auditauth-sdk.git"
+  },
+  "homepage": "https://docs.auditauth.com",
+  "bugs": {
+    "url": "https://github.com/nimibyte/auditauth-sdk/issues"
+  },
+  "keywords": [
+    "authentication",
+    "auth",
+    "oauth",
+    "identity",
+    "jwt",
+    "security",
+    "auditauth"
+  ],
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,8 +48,8 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@auditauth/core": "^0.1.0",
-    "@auditauth/node": "^0.1.0"
+    "@auditauth/core": "^0.2.0-beta.1",
+    "@auditauth/node": "^0.2.0-beta.1"
   },
   "devDependencies": {
     "typescript": "^5.9.0",
