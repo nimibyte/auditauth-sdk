@@ -1,6 +1,6 @@
 {
   "name": "@auditauth/next",
-  "version": "0.2.0-beta.3",
+  "version": "0.2.0-beta.4",
   "description": "AuditAuth NextJS SDK",
   "license": "MIT",
   "author": "Nimibyte",
@@ -42,7 +42,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node ../../scripts/fix-cjs-relative-imports.mjs dist",
     "dev": "tsup --watch",
     "clean": "rm -rf dist",
     "prepack": "npm run build"
@@ -53,8 +53,8 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@auditauth/core": "^0.2.0-beta.3",
-    "@auditauth/node": "^0.2.0-beta.3"
+    "@auditauth/core": "^0.2.0-beta.4",
+    "@auditauth/node": "^0.2.0-beta.4"
   },
   "devDependencies": {
     "typescript": "^5.9.0",
