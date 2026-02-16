@@ -12,6 +12,17 @@ Install the package in your Next.js application.
 npm install @auditauth/next
 ```
 
+## TypeScript import compatibility
+
+`@auditauth/next` ships dual module output (ESM + CJS) with declaration files.
+You can import it in TypeScript projects with standard syntax:
+
+```ts
+import { createAuditAuthNext } from '@auditauth/next'
+```
+
+You do not need to append `.js` in consumer imports.
+
 ## Create the AuditAuth provider
 
 Create one shared instance with `createAuditAuthNext()`.

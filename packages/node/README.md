@@ -12,6 +12,17 @@ Install the package in your Node.js service.
 npm install @auditauth/node
 ```
 
+## TypeScript import compatibility
+
+`@auditauth/node` ships dual module output (ESM + CJS) with declaration files.
+You can import it in TypeScript projects with standard syntax:
+
+```ts
+import { verifyAccessToken } from '@auditauth/node'
+```
+
+You do not need to append `.js` in consumer imports.
+
 ## Verify a bearer token
 
 Use `verifyAccessToken()` when you already have a raw JWT string.

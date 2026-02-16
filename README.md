@@ -59,6 +59,19 @@ npm install @auditauth/next
 npm install @auditauth/node
 ```
 
+## TypeScript import compatibility
+
+All published SDK packages provide dual module output (ESM + CJS) with
+export maps and bundled type declarations. You can use standard TypeScript
+imports in consumer projects without adding `.js` extensions:
+
+```ts
+import { verifyAccessToken } from '@auditauth/node'
+```
+
+This works across common TypeScript module resolution modes, including
+`node`, `nodenext`, and `bundler`.
+
 ## Shared config
 
 All integrations use the same base config shape:
@@ -196,7 +209,15 @@ Use workspace scripts from the SDK root:
 ```bash
 npm install
 npm run build
+npm run test:consumers
 ```
+
+`npm run test:consumers` validates package consumption from packed tarballs in
+three TypeScript fixture projects:
+
+- `CommonJS` + `moduleResolution: node`
+- `NodeNext` + `moduleResolution: nodenext`
+- Bundler mode + React and Next.js package type checks
 
 Individual package dev scripts:
 
