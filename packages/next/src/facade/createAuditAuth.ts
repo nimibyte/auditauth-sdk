@@ -1,8 +1,8 @@
-import { cookies } from 'next/headers';
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
-import { AuditAuthNext } from '../sdk';
-import { SETTINGS } from '../settings';
+import { cookies } from 'next/headers.js';
+import type { NextRequest } from 'next/server.js';
+import { NextResponse } from 'next/server.js';
+import { AuditAuthNext } from '../sdk.js';
+import { SETTINGS } from '../settings.js';
 import type { AuditAuthConfig, SessionUser } from '@auditauth/core';
 import type { AuditAuthTokenPayload } from '@auditauth/node';
 

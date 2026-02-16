@@ -1,4 +1,4 @@
-import { CORE_SETTINGS } from "../settings";
+import { CORE_SETTINGS } from '../settings.js';
 
 type RevokeSessionPayload = {
   access_token?: string;

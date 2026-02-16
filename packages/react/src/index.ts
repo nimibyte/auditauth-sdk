@@ -1,2 +1,2 @@
-export * from './provider';
-export * from './guard';
+export * from './provider.js';
+export * from './guard.js';

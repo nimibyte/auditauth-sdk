@@ -2,7 +2,7 @@
 /*                             CLIENT SHORTCUTS                               */
 /* -------------------------------------------------------------------------- */
 
-import { SETTINGS } from "./settings";
+import { SETTINGS } from './settings.js';
 
 const login = () => {
   window.location.href = SETTINGS.bff.paths.login;

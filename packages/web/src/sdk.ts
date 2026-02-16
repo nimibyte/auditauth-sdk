@@ -1,5 +1,5 @@
 import { AuditAuthConfig, authorizeCode, buildAuthUrl, buildPortalUrl, CORE_SETTINGS, Metric, refreshTokens, RequestMethod, revokeSession } from "@auditauth/core";
-import { StorageAdapter } from "./types";
+import type { StorageAdapter } from './types.js';
 
 class AuditAuthWeb {
   private config: AuditAuthConfig;

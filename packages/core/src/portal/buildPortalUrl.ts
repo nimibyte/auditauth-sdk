@@ -1,4 +1,4 @@
-import { CORE_SETTINGS } from "../settings";
+import { CORE_SETTINGS } from '../settings.js';
 
 type BuildPortalUrlPayload = {
   access_token: string;

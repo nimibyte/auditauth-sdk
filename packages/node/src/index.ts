@@ -1,6 +1,6 @@
 import { importSPKI, jwtVerify, KeyLike } from 'jose'
 import { CORE_SETTINGS } from '@auditauth/core'
-import { AuditAuthTokenPayload } from './types';
+import type { AuditAuthTokenPayload } from './types.js';
 
 let cachedKey: KeyLike | null = null
 

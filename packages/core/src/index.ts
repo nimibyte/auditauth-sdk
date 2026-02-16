@@ -1,6 +1,6 @@
-export * from './settings';
-export type * from './types';
+export * from './settings.js';
+export type * from './types.js';
 
-export * from './auth';
-export * from './portal';
-export * from './metrics';
+export * from './auth/index.js';
+export * from './portal/index.js';
+export * from './metrics/index.js';

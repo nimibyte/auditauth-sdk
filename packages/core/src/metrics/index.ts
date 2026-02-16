@@ -1,1 +1,1 @@
-export { default as sendMetrics } from './sendMetrics';
+export { default as sendMetrics } from './sendMetrics.js';
