@@ -1,5 +1,5 @@
-import { CORE_SETTINGS } from "../settings";
-import { CredentialsResponse } from "../types";
+import { CORE_SETTINGS } from '../settings.js';
+import type { CredentialsResponse } from '../types.js';
 
 type RefreshTokensPayload = {
   client_type: 'browser' | 'server';

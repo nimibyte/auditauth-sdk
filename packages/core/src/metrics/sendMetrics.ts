@@ -1,5 +1,5 @@
-import { CORE_SETTINGS } from "../settings";
-import { Metric } from "../types";
+import { CORE_SETTINGS } from '../settings.js';
+import type { Metric } from '../types.js';
 
 type SendMetricsPayload = {
   payload: Metric;

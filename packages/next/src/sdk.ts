@@ -1,7 +1,7 @@
 'use server'
-import { NextRequest, NextResponse } from "next/server";
-import { CookieAdapter, Session } from "./types";
-import { SETTINGS } from "./settings";
+import { NextRequest, NextResponse } from 'next/server.js';
+import type { CookieAdapter, Session } from './types.js';
+import { SETTINGS } from './settings.js';
 import {
   AuditAuthConfig,
   CredentialsResponse,

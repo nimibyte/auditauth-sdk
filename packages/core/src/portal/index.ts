@@ -1,1 +1,1 @@
-export { default as buildPortalUrl } from './buildPortalUrl';
+export { default as buildPortalUrl } from './buildPortalUrl.js';

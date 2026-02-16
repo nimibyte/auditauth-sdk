@@ -1,6 +1,6 @@
 {
   "name": "@auditauth/next",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.0-beta.2",
   "description": "AuditAuth NextJS SDK",
   "license": "MIT",
   "author": "Nimibyte",
@@ -48,8 +48,8 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@auditauth/core": "^0.2.0-beta.1",
-    "@auditauth/node": "^0.2.0-beta.1"
+    "@auditauth/core": "^0.2.0-beta.2",
+    "@auditauth/node": "^0.2.0-beta.2"
   },
   "devDependencies": {
     "typescript": "^5.9.0",

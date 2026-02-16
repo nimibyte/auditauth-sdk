@@ -1,8 +1,8 @@
 'use server'
 
-import { cookies } from "next/headers";
-import { SETTINGS } from "./settings";
-import { headers } from 'next/headers';
+import { cookies } from 'next/headers.js';
+import { SETTINGS } from './settings.js';
+import { headers } from 'next/headers.js';
 import { refreshTokens, RequestMethod } from "@auditauth/core";
 
 const getRequestOrigin = async (): Promise<string> => {

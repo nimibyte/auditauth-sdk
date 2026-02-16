@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
-import { useAuditAuth } from './provider'
+import { useAuditAuth } from './provider.js'
 
 type RequireAuthProps = {
   children: ReactNode
