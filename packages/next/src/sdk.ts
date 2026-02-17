@@ -16,7 +16,10 @@ import {
   Metric,
 } from '@auditauth/core';
 import { AuditAuthTokenPayload, verifyRequest } from "@auditauth/node";
-import { ok } from "assert";
+
+const CALLBACK_CODE_COOKIE = 'auditauth_last_code';
+const CALLBACK_CODE_TTL_SECONDS = 120;
+const callbackInFlight = new Map<string, Promise<{ ok: boolean; url: string }>>();
 
 class AuditAuthNext {
   private config: AuditAuthConfig;
@@ -43,8 +46,38 @@ class AuditAuthNext {
     };
   }
 
+  private isSecureCookie() {
+    return this.config.redirectUrl.startsWith('https://');
+  }
+
+  private hasAuthCookies() {
+    const { access, refresh } = this.getCookieTokens();
+    return !!(access && refresh);
+  }
+
+  private getLastAuthorizedCode() {
+    return this.cookies.get(CALLBACK_CODE_COOKIE);
+  }
+
+  private setLastAuthorizedCode(code: string) {
+    this.cookies.set(CALLBACK_CODE_COOKIE, code, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: this.isSecureCookie(),
+      path: '/',
+      maxAge: CALLBACK_CODE_TTL_SECONDS,
+    });
+  }
+
+  private isDuplicateCodeError(error: unknown) {
+    if (!(error instanceof Error)) return false;
+
+    const message = error.message.toLowerCase();
+    return message.includes('code not found');
+  }
+
   private setCookieTokens(params: CredentialsResponse) {
-    const isSecure = this.config.redirectUrl.includes('https');
+    const isSecure = this.isSecureCookie();
 
     this.cookies.set(
       SETTINGS.storage_keys.access,
@@ -110,40 +143,75 @@ class AuditAuthNext {
   private async callback(request: NextRequest) {
     const code = new URL(request.url).searchParams.get('code');
 
-    try {
-      const { data } = await authorizeCode({ code, client_type: 'server' });
-
-      const session: Session = {
-        user: data.user,
-      };
-
-      const isSecure = this.config.redirectUrl.includes('http');
-
-      this.cookies.set(
-        SETTINGS.storage_keys.session,
-        JSON.stringify(session),
-        {
-          httpOnly: true,
-          sameSite: 'lax',
-          secure: isSecure,
-          path: '/',
-          maxAge: data.refresh_expires_seconds - 60,
-        },
-      );
-
-      this.setCookieTokens({
-        access_token: data.access_token,
-        access_expires_seconds: data.access_expires_seconds,
-        refresh_token: data.refresh_token!,
-        refresh_expires_seconds: data.refresh_expires_seconds,
-      });
-
-      return { ok: true, url: this.config.redirectUrl };
-    } catch {
+    if (!code) {
       return {
         ok: false,
         url: `${SETTINGS.domains.client}/auth/invalid?reason=wrong_config`,
       };
+    }
+
+    const lastAuthorizedCode = this.getLastAuthorizedCode();
+    if (lastAuthorizedCode === code && (this.hasSession() || this.hasAuthCookies())) {
+      return { ok: true, url: this.config.redirectUrl };
+    }
+
+    const inFlight = callbackInFlight.get(code);
+    if (inFlight) return inFlight;
+
+    const authorizeRequest = (async () => {
+      try {
+        const { data } = await authorizeCode({ code, client_type: 'server' });
+
+        const session: Session = {
+          user: data.user,
+        };
+
+        const isSecure = this.isSecureCookie();
+
+        this.cookies.set(
+          SETTINGS.storage_keys.session,
+          JSON.stringify(session),
+          {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: isSecure,
+            path: '/',
+            maxAge: data.refresh_expires_seconds - 60,
+          },
+        );
+
+        this.setCookieTokens({
+          access_token: data.access_token,
+          access_expires_seconds: data.access_expires_seconds,
+          refresh_token: data.refresh_token!,
+          refresh_expires_seconds: data.refresh_expires_seconds,
+        });
+
+        this.setLastAuthorizedCode(code);
+
+        return { ok: true, url: this.config.redirectUrl };
+      } catch (error) {
+        if (
+          this.isDuplicateCodeError(error) &&
+          (this.hasSession() || this.hasAuthCookies() || this.getLastAuthorizedCode() === code)
+        ) {
+          this.setLastAuthorizedCode(code);
+          return { ok: true, url: this.config.redirectUrl };
+        }
+
+        return {
+          ok: false,
+          url: `${SETTINGS.domains.client}/auth/invalid?reason=wrong_config`,
+        };
+      }
+    })();
+
+    callbackInFlight.set(code, authorizeRequest);
+
+    try {
+      return await authorizeRequest;
+    } finally {
+      callbackInFlight.delete(code);
     }
   }
 
