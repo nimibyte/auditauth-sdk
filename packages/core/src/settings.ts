@@ -5,7 +5,7 @@ const PROD_DOMAINS = {
 
 const LOCAL_DOMAINS = {
   api: 'http://localhost:4000/v1',
-  client: 'http://localhost:3000',
+  client: 'https://localhost:3000',
 } as const;
 
 type ImportMetaLike = {
