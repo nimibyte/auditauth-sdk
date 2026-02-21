@@ -423,6 +423,24 @@ class AuditAuthNext {
 
               const refreshedUser = await getSessionUser({ access_token: access });
 
+              const session: Session = {
+                user: refreshedUser,
+              };
+
+              const isSecure = this.isSecureCookie();
+
+              this.cookies.set(
+                SETTINGS.storage_keys.session,
+                JSON.stringify(session),
+                {
+                  httpOnly: true,
+                  sameSite: 'lax',
+                  secure: isSecure,
+                  path: '/',
+                  maxAge: 24 * 60 * 60 * 1000 * 3,
+                },
+              );
+
               return NextResponse.json({ user: refreshedUser });
             } catch (err: any) {
               return new NextResponse(null, { status: 401 });
