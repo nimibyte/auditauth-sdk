@@ -6,7 +6,7 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "npm run build -ws",
+    "build": "npm run build:core && npm run build:web && npm run build:react && npm run build:node && npm run build:next && npm run build:example-next && npm run build:example-react && npm run build:example-vanilla",
     "test": "vitest run",
     "test:consumers": "node ./scripts/test-consumers.mjs",
 
