@@ -1,5 +1,5 @@
-import { CORE_SETTINGS } from "../settings";
-import { SessionUser } from "../types";
+import { CORE_SETTINGS } from "../settings.js";
+import type { SessionUser } from "../types.js";
 
 type GetUserSessionPayload = {
   access_token: string;

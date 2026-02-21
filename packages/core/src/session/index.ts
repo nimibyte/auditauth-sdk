@@ -1,1 +1,1 @@
-export { default as getSessionUser } from './getUserSession';
+export { default as getSessionUser } from './getUserSession.js';
