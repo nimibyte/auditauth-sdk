@@ -190,6 +190,7 @@ class AuditAuthWeb {
     const url = await buildAuthUrl({
       apiKey: this.config.apiKey,
       redirectUrl: this.config.redirectUrl,
+      cancelUrl: this.config.baseUrl,
     });
 
     window.location.href = url.href;
