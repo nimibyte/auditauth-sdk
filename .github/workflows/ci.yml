@@ -14,13 +14,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18.18
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
         run: npm install
+
+      - name: Workaround npm optional dependency bug (Rollup)
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        run: npm install --no-save @rollup/rollup-linux-x64-gnu
 
       - name: Build workspaces
         run: npm run build

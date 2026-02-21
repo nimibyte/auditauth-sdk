@@ -30,7 +30,10 @@ const authorizeCode = async ({ code, client_type }: AuthorizePayload): Promise<A
   });
 
   if (!response.ok) {
-    throw new Error('Unauthorized');
+    const errorMessage = await response.text().catch(() => 'Unauthorized');
+    const error = new Error(errorMessage || 'Unauthorized');
+    Object.assign(error, { status: response.status });
+    throw error;
   }
 
   const data = await response.json();

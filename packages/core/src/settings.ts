@@ -5,17 +5,28 @@ const PROD_DOMAINS = {
 
 const LOCAL_DOMAINS = {
   api: 'http://localhost:4000/v1',
-  client: 'http://localhost:3000',
+  client: 'https://localhost:3000',
 } as const;
 
+type ImportMetaLike = {
+  env?: Record<string, string | undefined>;
+};
+
+const resolveImportMeta = (): ImportMetaLike | undefined => {
+  try {
+    return Function(
+      'return typeof import.meta !== "undefined" ? import.meta : undefined;'
+    )() as ImportMetaLike | undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const resolveSdkEnv = () => {
+  const importMeta = resolveImportMeta();
   const importMetaEnv =
-    typeof import.meta !== 'undefined'
-      ? ((import.meta as { env?: Record<string, string | undefined> }).env
-          ?.AUDITAUTH_SDK_ENV ??
-        (import.meta as { env?: Record<string, string | undefined> }).env
-          ?.VITE_AUDITAUTH_SDK_ENV)
-      : undefined;
+    importMeta?.env?.AUDITAUTH_SDK_ENV ??
+    importMeta?.env?.VITE_AUDITAUTH_SDK_ENV;
 
   const globalEnv =
     typeof globalThis !== 'undefined'

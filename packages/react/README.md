@@ -12,6 +12,17 @@ Install the package in your React application.
 npm install @auditauth/react
 ```
 
+## TypeScript import compatibility
+
+`@auditauth/react` ships dual module output (ESM + CJS) with declaration files.
+You can import it in TypeScript projects with standard syntax:
+
+```tsx
+import { AuditAuthProvider } from '@auditauth/react'
+```
+
+You do not need to append `.js` in consumer imports.
+
 `@auditauth/react` has peer dependencies on `react` and `react-dom` version 18
 or higher.
 

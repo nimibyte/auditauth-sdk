@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { SETTINGS } from './settings.js';
 import { SessionUser } from "@auditauth/core";
 
@@ -13,39 +15,66 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const useAuditAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) {
-    throw new Error('useAuditAuth must be used within AuditAuthProvider');
+    throw new Error('useAuditAuth must be used within AuditAuthGuard');
   }
   return ctx;
 }
 
 type AuditAuthGuardProps = {
-  children: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
+  unauthenticatedFallback?: ReactNode;
+  mode?: 'redirect' | 'fallback';
 };
 
-const AuditAuthGuard = (props: AuditAuthGuardProps) => {
-  const [user, setUser] = useState<SessionUser>({} as SessionUser);
+type GuardState =
+  | { status: 'loading' | 'unauthenticated'; user: null }
+  | { status: 'authenticated'; user: SessionUser };
+
+const defaultFallback = <div>Verificando sesion...</div>;
+
+const AuditAuthGuard = ({
+  children,
+  fallback,
+  unauthenticatedFallback,
+  mode = 'redirect',
+}: AuditAuthGuardProps) => {
+  const router = useRouter();
+  const [state, setState] = useState<GuardState>({
+    status: 'loading',
+    user: null,
+  });
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
 
     const checkSession = async () => {
       try {
         const response = await fetch(SETTINGS.bff.paths.session, {
           credentials: 'include',
           cache: 'no-store',
+          signal: controller.signal,
         });
 
-        if (cancelled) return;
-
         if (!response.ok) {
-          window.location.href = SETTINGS.bff.paths.login;
+          setState({ status: 'unauthenticated', user: null });
+          if (mode === 'redirect') router.replace(SETTINGS.bff.paths.login);
           return;
         }
 
-        const data = await response.json();
-        setUser(data.user);
+        const data = await response.json() as { user?: SessionUser | null };
+
+        if (!data?.user || typeof data.user !== 'object') {
+          setState({ status: 'unauthenticated', user: null });
+          if (mode === 'redirect') router.replace(SETTINGS.bff.paths.login);
+          return;
+        }
+
+        setState({ status: 'authenticated', user: data.user });
       } catch {
-        window.location.href = SETTINGS.bff.paths.login;
+        if (controller.signal.aborted) return;
+        setState({ status: 'unauthenticated', user: null });
+        if (mode === 'redirect') router.replace(SETTINGS.bff.paths.login);
         return;
       }
     };
@@ -53,19 +82,26 @@ const AuditAuthGuard = (props: AuditAuthGuardProps) => {
     checkSession();
 
     return () => {
-      cancelled = true;
+      controller.abort();
     }
-  }, []);
+  }, [mode, router]);
 
-  const value = useMemo(() => ({
-    user,
-  }), [user]);
+  const value = useMemo<AuthContextValue | null>(() => {
+    if (state.status !== 'authenticated') return null;
+    return { user: state.user };
+  }, [state]);
 
-  if (!user.name) return null;
+  if (!value) {
+    if (state.status === 'unauthenticated') {
+      return <>{unauthenticatedFallback ?? fallback ?? defaultFallback}</>;
+    }
+
+    return <>{fallback ?? defaultFallback}</>;
+  }
 
   return (
     <AuthContext.Provider value={value}>
-      {props.children}
+      {children}
     </AuthContext.Provider>
   );
 };

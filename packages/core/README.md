@@ -12,6 +12,17 @@ Install the package in your project.
 npm install @auditauth/core
 ```
 
+## TypeScript import compatibility
+
+`@auditauth/core` ships dual module output (ESM + CJS) with declaration files.
+You can import it in TypeScript projects with standard syntax:
+
+```ts
+import { CORE_SETTINGS } from '@auditauth/core'
+```
+
+You do not need to append `.js` in consumer imports.
+
 ## Minimal example
 
 Import and use the core helpers directly.

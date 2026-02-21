@@ -12,6 +12,17 @@ Install the package in your app.
 npm install @auditauth/web
 ```
 
+## TypeScript import compatibility
+
+`@auditauth/web` ships dual module output (ESM + CJS) with declaration files.
+You can import it in TypeScript projects with standard syntax:
+
+```ts
+import { AuditAuthWeb } from '@auditauth/web'
+```
+
+You do not need to append `.js` in consumer imports.
+
 ## Create an SDK instance
 
 Create one `AuditAuthWeb` instance with your AuditAuth config and a storage
