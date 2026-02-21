@@ -3,16 +3,17 @@ import { CORE_SETTINGS } from '../settings.js';
 type BuildAuthUrlPayload = {
   apiKey: string;
   redirectUrl: string;
+  cancelUrl: string;
 };
 
-const buildAuthUrl = async ({ apiKey, redirectUrl }: BuildAuthUrlPayload) => {
+const buildAuthUrl = async ({ apiKey, redirectUrl, cancelUrl }: BuildAuthUrlPayload) => {
   const response = await fetch(`${CORE_SETTINGS.domains.api}/applications/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
     },
-    body: JSON.stringify({ redirect_url: redirectUrl }),
+    body: JSON.stringify({ redirect_url: redirectUrl, cancel_url: cancelUrl }),
   });
 
   if (!response.ok) {

@@ -363,7 +363,11 @@ class AuditAuthNext {
 
         switch (action) {
           case 'login': {
-            const url = await buildAuthUrl({ apiKey: this.config.apiKey, redirectUrl: `${this.config.baseUrl}/api/auditauth/callback` });
+            const url = await buildAuthUrl({
+              apiKey: this.config.apiKey,
+              redirectUrl: `${this.config.baseUrl}/api/auditauth/callback`,
+              cancelUrl: this.config.baseUrl,
+            });
             return NextResponse.redirect(url);
           };
 
@@ -371,7 +375,11 @@ class AuditAuthNext {
             const { ok } = await this.refresh();
             if (ok) return NextResponse.redirect(redirectUrl || this.config.redirectUrl);
 
-            const url = await buildAuthUrl({ apiKey: this.config.apiKey, redirectUrl: `${this.config.baseUrl}/api/auditauth/callback` });
+            const url = await buildAuthUrl({
+              apiKey: this.config.apiKey,
+              redirectUrl: `${this.config.baseUrl}/api/auditauth/callback`,
+              cancelUrl: this.config.baseUrl,
+            });
             return NextResponse.redirect(url);
           };
 
@@ -382,7 +390,7 @@ class AuditAuthNext {
 
           case 'logout': {
             await this.logout();
-            return NextResponse.redirect(this.config.redirectUrl);
+            return NextResponse.redirect(this.config.baseUrl);
           };
 
           case 'portal': {
