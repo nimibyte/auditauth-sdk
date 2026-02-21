@@ -14,6 +14,7 @@ import {
   SessionUser,
   RequestMethod,
   Metric,
+  getSessionUser,
 } from '@auditauth/core';
 import { AuditAuthTokenPayload, verifyRequest } from "@auditauth/node";
 
@@ -414,8 +415,18 @@ class AuditAuthNext {
 
           case 'session': {
             const user = this.getSession();
-            if (!user) return new NextResponse(null, { status: 401 });
-            return NextResponse.json({ user });
+            if (user) return NextResponse.json({ user });
+
+            try {
+              const { access } = this.getCookieTokens();
+              if (!access) throw new Error('Not auth token');
+
+              const refreshedUser = await getSessionUser({ access_token: access });
+
+              return NextResponse.json({ user: refreshedUser });
+            } catch (err: any) {
+              return new NextResponse(null, { status: 401 });
+            }
           };
 
           default: {
