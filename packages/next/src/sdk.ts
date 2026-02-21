@@ -363,12 +363,16 @@ class AuditAuthNext {
 
         switch (action) {
           case 'login': {
-            const url = await buildAuthUrl({
-              apiKey: this.config.apiKey,
-              redirectUrl: `${this.config.baseUrl}/api/auditauth/callback`,
-              cancelUrl: this.config.baseUrl,
-            });
-            return NextResponse.redirect(url);
+            try {
+              const url = await buildAuthUrl({
+                apiKey: this.config.apiKey,
+                redirectUrl: `${this.config.baseUrl}/api/auditauth/callback`,
+                cancelUrl: this.config.baseUrl,
+              });
+              return NextResponse.redirect(url);
+            } catch (err) {
+              return new Response('Invalid session', { status: 401 });
+            }
           };
 
           case 'refresh': {
