@@ -15,14 +15,16 @@ export function renderPrivate() {
         <img src="/logo.png" class="logo" />
         <div>
           <div class="title">AuditAuth SDK</div>
-          <div class="subtitle">Framework-agnostic example</div>
+          <div class="subtitle">
+            <a href="https://auditauth.com" target="_blank" rel="noreferrer" style="color: inherit; text-decoration: none;">Framework-agnostic example</a>
+          </div>
         </div>
       </div>
 
       <div style="display:flex; gap:16px; align-items:center;">
         <div class="badge">Authenticated</div>
         <div class="powered">
-          Powered by <a href="#" target="_blank">@auditauth/web</a>
+          Powered by <a href="https://github.com/nimibyte/auditauth-sdk" target="_blank" rel="noreferrer">auditauth-sdk</a>
         </div>
       </div>
     </div>

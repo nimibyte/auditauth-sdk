@@ -1,5 +1,5 @@
 'use server'
-import { NextRequest, NextResponse } from 'next/server.js';
+import { NextResponse } from 'next/server.js';
 import type { CookieAdapter, Session } from './types.js';
 import { SETTINGS } from './settings.js';
 import {
@@ -21,6 +21,8 @@ import { AuditAuthTokenPayload, verifyRequest } from "@auditauth/node";
 const CALLBACK_CODE_COOKIE = 'auditauth_last_code';
 const CALLBACK_CODE_TTL_SECONDS = 120;
 const callbackInFlight = new Map<string, Promise<{ ok: boolean; url: string }>>();
+
+type RouteRequest = Request;
 
 class AuditAuthNext {
   private config: AuditAuthConfig;
@@ -141,7 +143,7 @@ class AuditAuthNext {
     return url;
   }
 
-  private async callback(request: NextRequest) {
+  private async callback(request: RouteRequest) {
     const code = new URL(request.url).searchParams.get('code');
 
     if (!code) {
@@ -228,14 +230,14 @@ class AuditAuthNext {
     await revokeSession({ access_token: access }).catch(() => { });
   }
 
-  withAuthRequest<C>(
+  withAuthRequest<C, R extends Request = Request>(
     handler: (
-      req: NextRequest,
+      req: R,
       ctx: C,
       session: AuditAuthTokenPayload,
     ) => Promise<Response>
   ) {
-    return async (req: NextRequest, ctx: C) => {
+    return async (req: R, ctx: C) => {
       try {
         const session = await verifyRequest({
           request: req,
@@ -314,9 +316,9 @@ class AuditAuthNext {
     return { ok: true };
   }
 
-  async middleware(request: NextRequest) {
+  async middleware(request: RouteRequest) {
     const { access, refresh } = this.getCookieTokens();
-    const url = request.nextUrl;
+    const url = new URL(request.url);
 
     if (access && refresh) {
       const sid = this.cookies.get(SETTINGS.storage_keys.session_id);
@@ -358,9 +360,9 @@ class AuditAuthNext {
 
   getHandlers() {
     return {
-      GET: async (req: NextRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => {
+      GET: async (req: RouteRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => {
         const action = (await ctx.params).auditauth[0];
-        const redirectUrl = req.nextUrl.searchParams.get('redirectUrl');
+        const redirectUrl = new URL(req.url).searchParams.get('redirectUrl');
 
         switch (action) {
           case 'login': {
@@ -453,7 +455,7 @@ class AuditAuthNext {
         }
       },
 
-      POST: async (req: NextRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => {
+      POST: async (req: RouteRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => {
         const action = (await ctx.params).auditauth[0];
 
         switch (action) {
@@ -468,7 +470,7 @@ class AuditAuthNext {
           };
 
           case 'refresh': {
-            const redirectUrl = req.nextUrl.searchParams.get('redirectUrl');
+            const redirectUrl = new URL(req.url).searchParams.get('redirectUrl');
             const { ok } = await this.refresh();
             if (ok) return NextResponse.redirect(redirectUrl || this.config.redirectUrl);
 

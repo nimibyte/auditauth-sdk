@@ -4,12 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "AUDITAUTH_SDK_ENV=production VITE_AUDITAUTH_SDK_ENV=production vite",
+    "dev:local": "AUDITAUTH_SDK_ENV=development VITE_AUDITAUTH_SDK_ENV=development vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@auditauth/web": "^0.2.0-beta.5"
+    "@auditauth/web": "^0.2.0-beta.7"
   },
   "devDependencies": {
     "vite": "^7.3.1"

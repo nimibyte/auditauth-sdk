@@ -1,8 +1,10 @@
 import { AuditAuthWeb } from '@auditauth/web'
 
+const getEnv = (name) => import.meta.env[name] ?? `example_${name.toLowerCase()}`
+
 const auditauth = new AuditAuthWeb({
-  apiKey: 'aa_911d16484b0ef79c4d94dd8e1884b6ddc9bd445ef9e56077',
-  appId: '698b4ad0fbddf401832cb942',
+  apiKey: getEnv('VITE_AUDITAUTH_API_KEY'),
+  appId: getEnv('VITE_AUDITAUTH_APP_ID'),
   baseUrl: 'http://localhost:5173',
   redirectUrl: 'http://localhost:5173/private',
 }, {

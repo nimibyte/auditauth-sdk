@@ -4,6 +4,11 @@ import Private from './pages/private'
 import { AuditAuthProvider, useAuditAuth } from '@auditauth/react'
 import { useEffect } from 'react'
 
+const env = import.meta.env as Record<string, string | undefined>
+
+const getEnv = (name: 'VITE_AUDITAUTH_API_KEY' | 'VITE_AUDITAUTH_APP_ID') =>
+  env[name] ?? `example_${name.toLowerCase()}`
+
 function NavigationTracker() {
   const location = useLocation()
   const { trackNavigationPath } = useAuditAuth()
@@ -19,8 +24,8 @@ function App() {
   return (
     <AuditAuthProvider
       config={{
-        apiKey: 'aa_911d16484b0ef79c4d94dd8e1884b6ddc9bd445ef9e56077',
-        appId: '698b4ad0fbddf401832cb942',
+        apiKey: getEnv('VITE_AUDITAUTH_API_KEY'),
+        appId: getEnv('VITE_AUDITAUTH_APP_ID'),
         baseUrl: 'http://localhost:5173',
         redirectUrl: 'http://localhost:5173/private',
       }}
