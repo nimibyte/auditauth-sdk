@@ -36,8 +36,8 @@ VITE_AUDITAUTH_API_KEY=your_api_key
 VITE_AUDITAUTH_APP_ID=your_app_id
 ```
 
-If either variable is missing, startup fails with a clear error from
-`src/App.tsx`.
+If either variable is missing, the example uses placeholder values and auth
+requests fail until you set real credentials.
 
 ## Production and local infrastructure modes
 
@@ -72,8 +72,8 @@ Use this flow to verify your setup:
 
 If the example does not work as expected, check these common issues first.
 
-- `Missing VITE_AUDITAUTH_API_KEY` or `Missing VITE_AUDITAUTH_APP_ID`:
-  update `examples/react/.env.local`.
+- Login fails or redirects to invalid config:
+  update `examples/react/.env.local` with valid credentials.
 - Redirect mismatch after login:
   ensure your AuditAuth app allows `http://localhost:5173/private`.
 - Cookies not persisted:

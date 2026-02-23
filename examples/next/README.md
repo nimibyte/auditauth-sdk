@@ -36,8 +36,8 @@ AUDITAUTH_API_KEY=your_api_key
 AUDITAUTH_APP_ID=your_app_id
 ```
 
-If either variable is missing, startup fails with a clear error from
-`src/providers/auth.ts`.
+If either variable is missing, the example uses placeholder values and auth
+requests fail until you set real credentials.
 
 ## Production and local infrastructure modes
 
@@ -73,8 +73,8 @@ Use this flow to verify your setup:
 
 If the example does not work as expected, check these common issues first.
 
-- `Missing AUDITAUTH_API_KEY` or `Missing AUDITAUTH_APP_ID`:
-  update `examples/next/.env.local`.
+- Login fails or redirects to invalid config:
+  update `examples/next/.env.local` with valid credentials.
 - Redirect mismatch after login:
   ensure your AuditAuth app allows `http://localhost:5173/api/auditauth/callback`.
 - Session loop on `/private`:
