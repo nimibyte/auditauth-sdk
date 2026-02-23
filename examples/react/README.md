@@ -1,45 +1,82 @@
 # React example (`example-react`)
 
-Vite + React Router integration example for `@auditauth/react`.
+This example shows a React Router integration with `@auditauth/react` using
+Vite. It covers provider setup, navigation tracking, protected routes, and
+authenticated API calls.
 
 ## Requirements
 
-- Run commands from `sdk/`
-- Node.js 18+
-- npm 9+
+You need Node.js 18+ and npm 9+.
 
-## Run the example
+## Run in 60 seconds
+
+Start from the SDK root:
 
 ```bash
 npm install
+cp examples/react/.env.example examples/react/.env.local
 npm run dev:example-react
 ```
 
-App URL: `http://localhost:5173`
+Open `http://localhost:5173`.
+
+If you run from `examples/react` directly:
+
+```bash
+npm install
+npm run dev
+```
+
+## Configure credentials
+
+This example reads credentials from `examples/react/.env.local`.
+
+```bash
+VITE_AUDITAUTH_API_KEY=your_api_key
+VITE_AUDITAUTH_APP_ID=your_app_id
+```
+
+If either variable is missing, startup fails with a clear error from
+`src/App.tsx`.
+
+## Production and local infrastructure modes
+
+The default dev command targets production infrastructure. Use local mode only
+if you are developing SDK internals with local AuditAuth services running.
+
+- Production: `npm run dev:example-react`
+- Local infrastructure: `npm run dev:example-react:local`
 
 ## What this example covers
 
-- Provider setup with `AuditAuthProvider` in `src/App.tsx`
-- Route change tracking in `NavigationTracker` (`src/App.tsx`)
-- Public route rendering in `src/pages/public.tsx`
-- Private route protection with `RequireAuth` in `src/pages/private.tsx`
-- Session actions (`logout()`, `goToPortal()`) in `src/pages/private.tsx`
-- Authenticated HTTP calls with `useAuditAuth().fetch()`
+You can use this example as a blueprint for a client-only React integration.
 
-## Integration flow
+- Provider setup: `src/App.tsx`
+- Navigation tracking: `NavigationTracker` in `src/App.tsx`
+- Public and private route split: `src/pages/public.tsx`, `src/pages/private.tsx`
+- Route guard behavior: `RequireAuth` in `src/pages/private.tsx`
+- Session actions (`logout`, `goToPortal`): `src/pages/private.tsx`
+- Authenticated requests through SDK `fetch()`: `src/pages/private.tsx`
 
-1. Wrap the app with `AuditAuthProvider` and SDK config.
-2. Mount router and call `trackNavigationPath()` on route changes.
-3. Gate private content with `RequireAuth`.
-4. Read session user via `useAuditAuth().user`.
-5. Use `useAuditAuth().fetch()` for authenticated requests.
+## Expected behavior
 
-## Local testing notes
+Use this flow to verify your setup:
 
-- The private page includes an API test button that calls
-  `https://jsonplaceholder.typicode.com/posts/1` via SDK `fetch()`.
+1. Open `/` and confirm the public page renders.
+2. Open `/private` and confirm unauthenticated users are sent to login.
+3. Complete login and confirm you return to `/private`.
+4. Run the API test button and confirm a successful JSON response.
+5. Click logout and confirm private access is blocked again.
 
-## Credentials note
+## Troubleshooting
 
-This example uses hardcoded sample credentials in `src/App.tsx` for local
-testing. Replace them with environment-driven values before production use.
+If the example does not work as expected, check these common issues first.
+
+- `Missing VITE_AUDITAUTH_API_KEY` or `Missing VITE_AUDITAUTH_APP_ID`:
+  update `examples/react/.env.local`.
+- Redirect mismatch after login:
+  ensure your AuditAuth app allows `http://localhost:5173/private`.
+- Cookies not persisted:
+  check browser privacy settings for localhost.
+- Calls hitting local infrastructure unexpectedly:
+  run `npm run dev:example-react` instead of `npm run dev:example-react:local`.

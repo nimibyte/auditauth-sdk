@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "AUDITAUTH_SDK_ENV=production NEXT_PUBLIC_AUDITAUTH_SDK_ENV=production next dev",
+    "dev:local": "AUDITAUTH_SDK_ENV=development NEXT_PUBLIC_AUDITAUTH_SDK_ENV=development next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

@@ -36,8 +36,8 @@ const resolveSdkEnv = () => {
   const processEnv =
     typeof process !== 'undefined'
       ? process.env?.AUDITAUTH_SDK_ENV ??
-        process.env?.NEXT_PUBLIC_AUDITAUTH_SDK_ENV ??
-        process.env?.NODE_ENV
+        process.env?.VITE_AUDITAUTH_SDK_ENV ??
+        process.env?.NEXT_PUBLIC_AUDITAUTH_SDK_ENV
       : undefined;
 
   return (importMetaEnv ?? globalEnv ?? processEnv ?? 'production').toLowerCase();

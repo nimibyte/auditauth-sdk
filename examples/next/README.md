@@ -1,52 +1,83 @@
 # Next.js example (`example-next`)
 
-Next.js App Router integration example for `@auditauth/next`.
+This example shows a complete Next.js App Router integration using
+`@auditauth/next`, including route handlers, middleware protection, session
+access, and authenticated server-side requests.
 
 ## Requirements
 
-- Run commands from `sdk/`
-- Node.js 18+
-- npm 9+
+You need Node.js 18+ and npm 9+.
 
-## Run the example
+## Run in 60 seconds
+
+Start from the SDK root:
 
 ```bash
 npm install
+cp examples/next/.env.example examples/next/.env.local
 npm run dev:example-next
 ```
 
-App URL: `http://localhost:5173`
+Open `http://localhost:5173`.
+
+If you run from `examples/next` directly:
+
+```bash
+npm install
+npm run dev
+```
+
+## Configure credentials
+
+This example reads credentials from `examples/next/.env.local`.
+
+```bash
+AUDITAUTH_API_KEY=your_api_key
+AUDITAUTH_APP_ID=your_app_id
+```
+
+If either variable is missing, startup fails with a clear error from
+`src/providers/auth.ts`.
+
+## Production and local infrastructure modes
+
+The default dev command targets production infrastructure. Use local mode only
+if you are developing SDK internals with local AuditAuth services running.
+
+- Production: `npm run dev:example-next`
+- Local infrastructure: `npm run dev:example-next:local`
 
 ## What this example covers
 
-- SDK instance setup in `src/providers/auth.ts`
-- Auth callback/login handlers in `src/app/api/auditauth/[...auditauth]/route.ts`
-- Route protection through SDK middleware in `src/proxy.ts`
-- Server-side session read with `auditauth.getSession()` in
-  `src/app/private/page.tsx`
-- Protected API route wrapper with `auditauth.withAuthRequest()` in
-  `src/app/api/test/protected/route.ts`
-- Authenticated server request with `auditauth.fetch()` in
-  `src/app/private/actions.ts`
+You can use this example as a blueprint for a complete App Router integration.
 
-## Integration flow
+- SDK instance setup: `src/providers/auth.ts`
+- Auth handlers: `src/app/api/auditauth/[...auditauth]/route.ts`
+- Route protection: `src/proxy.ts`
+- Session reads in server components: `src/app/private/page.tsx`
+- Protected API route wrapper: `src/app/api/test/protected/route.ts`
+- Authenticated server call flow: `src/app/private/actions.ts`
 
-1. Create a single `auditauth` instance using `createAuditAuthNext()`.
-2. Export `GET`/`POST` from `auditauth.handlers` for auth routes.
-3. Protect private routes through `auditauth.middleware()`.
-4. Read user session in server components with `auditauth.getSession()`.
-5. Use `auditauth.fetch()` for authenticated server-side calls.
-6. Wrap protected API handlers with `auditauth.withAuthRequest()`.
+## Expected behavior
 
-## Local testing notes
+Use this flow to verify your setup:
 
-- `Normal fetch` in the private page calls `/api/test/protected` with native
-  `fetch`.
-- `Auth fetch` calls the same endpoint through server action logic that uses
-  `auditauth.fetch()`.
+1. Open `/` and confirm the public page renders.
+2. Open `/private` and confirm middleware redirects unauthenticated users.
+3. Complete login and confirm you return to `/private`.
+4. Click `Normal fetch` and `Auth fetch` in the API tester.
+5. Confirm both calls return JSON from `/api/test/protected`.
+6. Click `Logout` and confirm `/private` redirects again.
 
-## Credentials note
+## Troubleshooting
 
-This example uses hardcoded sample credentials in `src/providers/auth.ts` for
-local testing. Replace them with environment-driven values before production
-use.
+If the example does not work as expected, check these common issues first.
+
+- `Missing AUDITAUTH_API_KEY` or `Missing AUDITAUTH_APP_ID`:
+  update `examples/next/.env.local`.
+- Redirect mismatch after login:
+  ensure your AuditAuth app allows `http://localhost:5173/api/auditauth/callback`.
+- Session loop on `/private`:
+  confirm browser cookies are enabled for localhost.
+- Calls hitting local infrastructure unexpectedly:
+  run `npm run dev:example-next` instead of `npm run dev:example-next:local`.

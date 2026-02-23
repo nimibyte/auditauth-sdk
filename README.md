@@ -199,22 +199,61 @@ assets untouched.
 
 ## Run examples
 
-From the SDK root:
+The examples are the fastest way to learn the SDK integration flow. By
+default, example dev commands target AuditAuth production infrastructure.
+
+### Quick start (production)
+
+Run these commands from the SDK root:
 
 ```bash
 npm install
-
-# framework-agnostic browser example
 npm run dev:example-vanilla
-
-# react example
 npm run dev:example-react
-
-# next.js example
 npm run dev:example-next
 ```
 
-Example docs:
+All examples run on `http://localhost:5173`. Run one at a time.
+
+Before first run, copy the environment template for the example you want to
+use and set your credentials:
+
+```bash
+cp examples/vanilla/.env.example examples/vanilla/.env.local
+cp examples/react/.env.example examples/react/.env.local
+cp examples/next/.env.example examples/next/.env.local
+```
+
+### Choose an example
+
+Use the example that matches your stack and target integration style.
+
+- `examples/vanilla`: plain JavaScript + Vite + `@auditauth/web`
+- `examples/react`: React Router + Vite + `@auditauth/react`
+- `examples/next`: Next.js App Router + `@auditauth/next`
+
+### Local infrastructure mode
+
+If you are contributing to SDK internals and need local AuditAuth services, use
+the explicit local variants:
+
+```bash
+npm run dev:example-vanilla:local
+npm run dev:example-react:local
+npm run dev:example-next:local
+```
+
+### Validate an example run
+
+After startup, validate the integration with this quick checklist:
+
+1. Open `/` and confirm the public page renders.
+2. Open `/private` and confirm you are redirected to login when unauthenticated.
+3. Complete login and confirm you return to the private page.
+4. Trigger the example protected API test and confirm the response is `200`.
+5. Log out and confirm private access is blocked again.
+
+Example-specific guides:
 
 - `examples/vanilla/README.md`
 - `examples/react/README.md`

@@ -25,15 +25,18 @@
     "build:next": "npm run build -w @auditauth/next",
     "dev:next": "AUDITAUTH_SDK_ENV=development npm run dev -w @auditauth/next",
 
-    "dev:example-vanilla": "AUDITAUTH_SDK_ENV=development VITE_AUDITAUTH_SDK_ENV=development npm run dev -w example-vanilla -- --port 5173",
+    "dev:example-vanilla": "AUDITAUTH_SDK_ENV=production VITE_AUDITAUTH_SDK_ENV=production npm run dev -w example-vanilla -- --port 5173",
+    "dev:example-vanilla:local": "AUDITAUTH_SDK_ENV=development VITE_AUDITAUTH_SDK_ENV=development npm run dev -w example-vanilla -- --port 5173",
     "build:example-vanilla": "npm run build -w example-vanilla",
     "preview:example-vanilla": "npm run preview -w example-vanilla",
 
-    "dev:example-next": "AUDITAUTH_SDK_ENV=development NEXT_PUBLIC_AUDITAUTH_SDK_ENV=development npm run dev -w example-next -- --port 5173",
+    "dev:example-next": "AUDITAUTH_SDK_ENV=production NEXT_PUBLIC_AUDITAUTH_SDK_ENV=production npm run dev -w example-next -- --port 5173",
+    "dev:example-next:local": "AUDITAUTH_SDK_ENV=development NEXT_PUBLIC_AUDITAUTH_SDK_ENV=development npm run dev -w example-next -- --port 5173",
     "build:example-next": "npm run build -w example-next",
     "preview:example-next": "npm run preview -w example-next",
 
-    "dev:example-react": "AUDITAUTH_SDK_ENV=development VITE_AUDITAUTH_SDK_ENV=development npm run dev -w example-react -- --port 5173",
+    "dev:example-react": "AUDITAUTH_SDK_ENV=production VITE_AUDITAUTH_SDK_ENV=production npm run dev -w example-react -- --port 5173",
+    "dev:example-react:local": "AUDITAUTH_SDK_ENV=development VITE_AUDITAUTH_SDK_ENV=development npm run dev -w example-react -- --port 5173",
     "build:example-react": "npm run build -w example-react",
     "preview:example-react": "npm run preview -w example-react"
   },

@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "AUDITAUTH_SDK_ENV=production VITE_AUDITAUTH_SDK_ENV=production vite",
+    "dev:local": "AUDITAUTH_SDK_ENV=development VITE_AUDITAUTH_SDK_ENV=development vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
