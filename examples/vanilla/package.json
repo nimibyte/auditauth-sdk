@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@auditauth/web": "^0.2.0-beta.5"
+    "@auditauth/web": "^0.2.0-beta.7"
   },
   "devDependencies": {
     "vite": "^7.3.1"

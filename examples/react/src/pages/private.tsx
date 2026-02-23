@@ -20,14 +20,18 @@ export default function Private() {
           <img src="/logo.png" className="logo" />
           <div>
             <div className="title">AuditAuth SDK</div>
-            <div className="subtitle">React Example</div>
+            <div className="subtitle">
+              <a href="https://auditauth.com" target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
+                React Example
+              </a>
+            </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <div className="badge">Authenticated</div>
           <div className="powered">
-            Powered by <a href="#" target="_blank">@auditauth/react</a>
+            Powered by <a href="https://github.com/nimibyte/auditauth-sdk" target="_blank" rel="noreferrer">auditauth-sdk</a>
           </div>
         </div>
       </div>

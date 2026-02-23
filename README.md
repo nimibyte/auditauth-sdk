@@ -154,6 +154,31 @@ Wire API route handlers:
 export const { GET, POST } = auditauth.handlers
 ```
 
+### Appendix: Next.js proxy (`proxy.ts`)
+
+For private route groups, wire the SDK middleware through Next.js proxy.
+
+```ts
+// proxy.ts
+import { NextResponse, type NextRequest } from 'next/server'
+import { auditauth } from '@/providers/auth'
+
+export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith('/private')) {
+    return auditauth.middleware(request)
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+}
+```
+
+This keeps `/private` protected server-side while leaving public routes and
+assets untouched.
+
 ## Runtime lifecycle
 
 1. Redirect user to AuditAuth login.

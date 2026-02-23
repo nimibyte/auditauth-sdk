@@ -1,8 +1,8 @@
 import { createAuditAuthNext } from '@auditauth/next';
 
 const auditauth = createAuditAuthNext({
-  apiKey: 'aa_911d16484b0ef79c4d94dd8e1884b6ddc9bd445ef9e56077',
-  appId: '698b4ad0fbddf401832cb942',
+  apiKey: 'aa_d80b57881df9ac381287315ea390247ca031079d2696d903',
+  appId: '699bf2e3eb30f53c85d0dc4a',
   baseUrl: 'http://localhost:5173',
   redirectUrl: 'http://localhost:5173/private',
 });

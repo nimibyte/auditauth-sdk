@@ -7,12 +7,14 @@ export function renderPublic() {
         <img src="/logo.png" class="logo" />
         <div>
           <div class="title">AuditAuth SDK</div>
-          <div class="subtitle">Vanilla JavaScript Example</div>
+          <div class="subtitle">
+            <a href="https://auditauth.com" target="_blank" rel="noreferrer" style="color: inherit; text-decoration: none;">Vanilla JavaScript Example</a>
+          </div>
         </div>
       </div>
 
       <div class="powered">
-        Powered by <a href="#" target="_blank">@auditauth/web</a>
+        Powered by <a href="https://github.com/nimibyte/auditauth-sdk" target="_blank" rel="noreferrer">auditauth-sdk</a>
       </div>
     </div>
 

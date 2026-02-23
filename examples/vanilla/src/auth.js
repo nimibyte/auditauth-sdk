@@ -1,8 +1,8 @@
 import { AuditAuthWeb } from '@auditauth/web'
 
 const auditauth = new AuditAuthWeb({
-  apiKey: 'aa_911d16484b0ef79c4d94dd8e1884b6ddc9bd445ef9e56077',
-  appId: '698b4ad0fbddf401832cb942',
+  apiKey: 'aa_cd4f5541c6c31c16a1932982d63758631cc6131044ff1faa',
+  appId: '699c105fcf9d1a9d93780188',
   baseUrl: 'http://localhost:5173',
   redirectUrl: 'http://localhost:5173/private',
 }, {
