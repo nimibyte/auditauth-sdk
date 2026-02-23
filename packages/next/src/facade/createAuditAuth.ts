@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers.js';
-import type { NextRequest } from 'next/server.js';
 import { NextResponse } from 'next/server.js';
 import { AuditAuthNext } from '../sdk.js';
 import { SETTINGS } from '../settings.js';
@@ -8,19 +7,19 @@ import type { AuditAuthTokenPayload } from '@auditauth/node';
 
 type AuditAuthNextFacade = {
   handlers: {
-    GET: (req: NextRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => Promise<Response>;
-    POST: (req: NextRequest, ctx: { params: Promise<{ auditauth: string[] }> }) => Promise<Response>;
+    GET: (req: Request, ctx: { params: Promise<{ auditauth: string[] }> }) => Promise<Response>;
+    POST: (req: Request, ctx: { params: Promise<{ auditauth: string[] }> }) => Promise<Response>;
   };
-  middleware: (req: NextRequest) => Promise<NextResponse>;
+  middleware: (req: Request) => Promise<NextResponse>;
   getSession: () => Promise<SessionUser | null>;
   hasSession: () => Promise<boolean>;
   fetch: (url: string, init?: RequestInit) => Promise<Response>;
   getLoginUrl: () => URL;
   getLogoutUrl: () => URL;
   getPortalUrl: () => URL;
-  withAuthRequest: <C>(
-    handler: (req: NextRequest, ctx: C, session: AuditAuthTokenPayload) => Promise<Response>
-  ) => (req: NextRequest, ctx: C) => Promise<Response>;
+  withAuthRequest: <C, R extends Request = Request>(
+    handler: (req: R, ctx: C, session: AuditAuthTokenPayload) => Promise<Response>
+  ) => (req: R, ctx: C) => Promise<Response>;
 };
 
 function createAuditAuthNext(config: AuditAuthConfig): AuditAuthNextFacade {
@@ -67,12 +66,12 @@ function createAuditAuthNext(config: AuditAuthConfig): AuditAuthNextFacade {
       return instance.fetch(url, init);
     },
 
-    withAuthRequest: <C, >(
-      handler: (req: NextRequest, ctx: C, session: AuditAuthTokenPayload) => Promise<Response>
+    withAuthRequest: <C, R extends Request = Request>(
+      handler: (req: R, ctx: C, session: AuditAuthTokenPayload) => Promise<Response>
     ) => {
-      return async (req: NextRequest, ctx: C) => {
+      return async (req: R, ctx: C) => {
         const instance = await createInstance();
-        return instance.withAuthRequest<C>(handler)(req, ctx);
+        return instance.withAuthRequest<C, R>(handler)(req, ctx);
       };
     },
 
