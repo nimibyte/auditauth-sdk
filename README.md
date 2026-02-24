@@ -136,14 +136,27 @@ Use `useAuditAuth()` in child components to access `user`, `login`, `logout`,
 
 ### Next.js apps (`@auditauth/next`)
 
+Create a new Next.js app with the official AuditAuth example:
+
+```bash
+npx create-next-app@latest my-app \
+  --example "https://github.com/nimibyte/auditauth-sdk" \
+  --example-path "examples/next"
+cd my-app
+cp .env.example .env.local
+npm run dev -- --port 5173
+```
+
+Then set `AUDITAUTH_API_KEY` and `AUDITAUTH_APP_ID` in `.env.local`.
+
 ```ts
 import { createAuditAuthNext } from '@auditauth/next'
 
 export const auditauth = createAuditAuthNext({
   apiKey: process.env.AUDITAUTH_API_KEY!,
   appId: process.env.AUDITAUTH_APP_ID!,
-  baseUrl: 'http://localhost:3000',
-  redirectUrl: 'http://localhost:3000/private',
+  baseUrl: 'http://localhost:5173',
+  redirectUrl: 'http://localhost:5173/private',
 })
 ```
 
