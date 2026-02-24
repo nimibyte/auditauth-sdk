@@ -1,6 +1,6 @@
 {
   "name": "@auditauth/web",
-  "version": "0.2.0-beta.7",
+  "version": "0.2.0-beta.8",
   "description": "AuditAuth Web SDK (framework-agnostic)",
   "license": "MIT",
   "author": "Nimibyte",
@@ -48,7 +48,7 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@auditauth/core": "^0.2.0-beta.7"
+    "@auditauth/core": "^0.2.0-beta.8"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

@@ -39,13 +39,11 @@ VITE_AUDITAUTH_APP_ID=your_app_id
 If either variable is missing, the example uses placeholder values and auth
 requests fail until you set real credentials.
 
-## Production and local infrastructure modes
+## Runtime mode
 
-The default dev command targets production infrastructure. Use local mode only
-if you are developing SDK internals with local AuditAuth services running.
+This example always targets AuditAuth production infrastructure.
 
-- Production: `npm run dev:example-react`
-- Local infrastructure: `npm run dev:example-react:local`
+- Run: `npm run dev:example-react`
 
 ## What this example covers
 
@@ -78,5 +76,3 @@ If the example does not work as expected, check these common issues first.
   ensure your AuditAuth app allows `http://localhost:5173/private`.
 - Cookies not persisted:
   check browser privacy settings for localhost.
-- Calls hitting local infrastructure unexpectedly:
-  run `npm run dev:example-react` instead of `npm run dev:example-react:local`.

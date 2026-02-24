@@ -1,6 +1,6 @@
 {
   "name": "@auditauth/node",
-  "version": "0.2.0-beta.7",
+  "version": "0.2.0-beta.8",
   "description": "AuditAuth Node SDK - JWT verification",
   "license": "MIT",
   "author": "Nimibyte",
@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "jose": "^5.2.0",
-    "@auditauth/core": "^0.2.0-beta.7"
+    "@auditauth/core": "^0.2.0-beta.8"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

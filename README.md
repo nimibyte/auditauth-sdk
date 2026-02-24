@@ -232,17 +232,6 @@ Use the example that matches your stack and target integration style.
 - `examples/react`: React Router + Vite + `@auditauth/react`
 - `examples/next`: Next.js App Router + `@auditauth/next`
 
-### Local infrastructure mode
-
-If you are contributing to SDK internals and need local AuditAuth services, use
-the explicit local variants:
-
-```bash
-npm run dev:example-vanilla:local
-npm run dev:example-react:local
-npm run dev:example-next:local
-```
-
 ### Validate an example run
 
 After startup, validate the integration with this quick checklist:

@@ -5,13 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "AUDITAUTH_SDK_ENV=production VITE_AUDITAUTH_SDK_ENV=production vite",
-    "dev:local": "AUDITAUTH_SDK_ENV=development VITE_AUDITAUTH_SDK_ENV=development vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@auditauth/react": "^0.2.0-beta.7",
+    "@auditauth/react": "^0.2.0-beta.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.0"

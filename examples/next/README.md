@@ -39,13 +39,11 @@ AUDITAUTH_APP_ID=your_app_id
 If either variable is missing, the example uses placeholder values and auth
 requests fail until you set real credentials.
 
-## Production and local infrastructure modes
+## Runtime mode
 
-The default dev command targets production infrastructure. Use local mode only
-if you are developing SDK internals with local AuditAuth services running.
+This example always targets AuditAuth production infrastructure.
 
-- Production: `npm run dev:example-next`
-- Local infrastructure: `npm run dev:example-next:local`
+- Run: `npm run dev:example-next`
 
 ## What this example covers
 
@@ -79,5 +77,3 @@ If the example does not work as expected, check these common issues first.
   ensure your AuditAuth app allows `http://localhost:5173/api/auditauth/callback`.
 - Session loop on `/private`:
   confirm browser cookies are enabled for localhost.
-- Calls hitting local infrastructure unexpectedly:
-  run `npm run dev:example-next` instead of `npm run dev:example-next:local`.

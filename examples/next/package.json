@@ -4,14 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "AUDITAUTH_SDK_ENV=production NEXT_PUBLIC_AUDITAUTH_SDK_ENV=production next dev",
-    "dev:local": "AUDITAUTH_SDK_ENV=development NEXT_PUBLIC_AUDITAUTH_SDK_ENV=development next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
-    "@auditauth/next": "^0.2.0-beta.7",
-    "@auditauth/node": "^0.2.0-beta.7",
+    "@auditauth/next": "^0.2.0-beta.8",
+    "@auditauth/node": "^0.2.0-beta.8",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
